@@ -20,7 +20,7 @@
 #define DEFAULT_AP_SSID "OBD-Monitor"
 #define DEFAULT_AP_PASS "12345678"      // min 8 characters
 
-// ---- Time zone for the clock on the screen (Israel) ----
+// ---- Time zone for the clock on the screen (POSIX TZ string - change for your region) ----
 #define TZ_INFO "IST-2IDT,M3.4.4/26,M10.5.0"
 
 // ---- Limits ----

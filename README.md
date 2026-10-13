@@ -177,10 +177,22 @@ Both boxes have the same openings: USB-C (low) + OBD cable hole (above) on the l
 <tr><td><code>case/archive/lid_v1_centered.stl</code></td><td><b><code>case/v2/lid_shift5.5.stl</code></b></td><td>rim, click bumps, wire gaps, dot</td></tr>
 </table>
 
-How the lid works: a 1.6 mm front plate with the screen window and a bevelled edge. On the inside, a 5.5 mm rim slides into the box (0.2 mm fit gap). The display PCB sits inside the rim, glass against the plate. Four small bumps click into grooves in the box walls. Gaps in the short ends of the rim let the display wires through. A **raised dot** inside marks the pin-header end.
+How the lid works: a 1.6 mm front plate with the screen window and a bevelled edge. On the inside, a 5.5 mm rim slides into the box (0.2 mm fit gap). The display PCB sits inside the rim, glass against the plate. Four small bumps click into grooves in the box walls. Gaps in the short ends of the rim let the display wires through. On the v2 lid, a **raised dot** inside marks the pin-header end.
 
-- **Original lid (v1, centred window):** the window is centred on the display PCB. On the real 2.4" board the picture isn't centred, so the screen sat off the window and the plastic covered part of it. Kept only for reference.
-- **Shifted lid (v2, tested ✅):** the window (38.7 × 51.0 mm) is **moved 5.5 mm away from the pin-header end**, so it lines up with the actual picture. **Print this one.** Put the display in with its pin header at the dot.
+#### Difference between the two lids
+
+| | Original lid (v1) | Shifted lid (v2) ✅ |
+|---|---|---|
+| File | `case/archive/lid_v1_centered.stl` | `case/v2/lid_shift5.5.stl` |
+| Window position | Centred on the display PCB | **Moved 5.5 mm** along the long side, away from the pin-header end |
+| Window size (inner edge) | 38.3 × 50.6 mm (0.8 mm margin around the picture) | 38.7 × 51.0 mm (1.0 mm margin) |
+| Window size (outer bevel) | 40.3 × 52.6 mm | 40.6 × 52.9 mm |
+| Orientation dot | none | Raised Ø 3 mm dot inside, at the pin-header end |
+| Result on the real display | The picture sat ~5.5 mm off the window, so plastic covered one edge of the screen and showed the bare board at the other | The window lines up with the picture |
+| Everything else | Same outside size (49.3 × 83.8 × 7.1 mm), 1.6 mm plate, 5.5 mm rim, 4 click bumps, wire gaps, ≈ 2 m PLA | same |
+
+Why the shift: on these 2.4" boards the visible screen is **not centred** on the red PCB. It sits about 5.5 mm away from the end with the 14-pin header. The v1 lid assumed it was centred. The v2 lid moves the window to where the picture really is. This was measured on the printed v1 lid and confirmed with a test print.
+When assembling, put the display in with its **pin header at the dot**, or the window will be off the other way.
 
 **Printing:** PLA, 0.2 mm layers. Box open side up, lid face down; no supports needed.
 To change sizes, edit the numbers at the top of the scripts in `case/v2/` and run them (`pip install manifold3d trimesh numpy`).

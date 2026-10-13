@@ -1,4 +1,4 @@
-OBD Monitor case - v2   (saved 2026-10-13 15:14, Israel time)
+OBD Monitor case - v2   (2026-10-13)
 ================================================================
 Print ONE box + the lid.
 
