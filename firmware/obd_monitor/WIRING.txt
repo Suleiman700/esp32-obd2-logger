@@ -1,0 +1,36 @@
+OBD MONITOR v3.0 (landscape) - FINAL WIRING
+===============================
+Solder by the LABEL printed next to each pin, not by position.
+
+DISPLAY (2.4" ILI9341, 14 pins)        ESP32
+  VCC ................................ 3.3V
+  GND ................................ GND
+  CS ................................. D15
+  RESET .............................. D4
+  DC ................................. D2
+  SDI (MOSI) + T_DIN (joined) ........ D23
+  SCK + T_CLK (joined) ............... D18
+  LED ................................ 3.3V
+  T_CS ............................... D22
+  T_DO ............................... D19
+  SDO (MISO) ......................... leave UNCONNECTED for now (may block touch)
+  T_IRQ .............................. not used - leave unconnected
+
+PUSH BUTTON   one leg -> D13, other leg -> GND  (4-leg button: use diagonal legs)
+BUZZER        + -> D25, - -> GND   (3-pin module: VCC 3.3V, I/O D25, GND)
+
+CAN BOARD (SN65HVD230)
+  3.3V -> 3.3V   GND -> GND   TX -> D16 (may be labelled RX2)   RX -> D5
+  CANH -> OBD pin 6    CANL -> OBD pin 14
+EXTRA GROUND   ESP32 GND -> OBD pin 5
+
+POWER IN THE CAR (LM2596 buck)
+  OBD pin 16 (+12V) -> 1A fuse -> buck IN+
+  OBD pin 4 (GND) ----------------> buck IN-
+  buck OUT+ (SET TO 5.0V FIRST, nothing connected) -> ESP32 VIN
+  buck OUT- -> ESP32 GND
+  Never connect pin 16 directly to the ESP32.
+
+ARDUINO IDE
+  Board: ESP32 Dev Module, esp32 core 2.0.17, Partition: Default 4MB with spiffs
+  Library: TFT_eSPI with the included User_Setup.h
