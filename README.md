@@ -3,6 +3,8 @@
 A small dashboard that plugs into any car with an **OBD-II port on CAN bus** (most cars from about 2008 on).
 It reads live engine data and shows it on a 2.4" touch screen. It runs its own **WiFi hotspot with a control panel**, logs data and streams it to your server (n8n, Node-RED, Home Assistant…). Alert rules sound a buzzer.
 
+<p align="center"><img src="docs/images/case/assembled_vents.png" width="520"></p>
+
 **Contents:** [Features](#features) · [Screen](#screen) · [DEMO / LIVE / LOST](#demo--live--lost-modes) · [Hotspot & web panel](#wifi-hotspot--web-panel) · [Parts](#parts) · [Wiring](#wiring) · [3D-printed case](#3d-printed-case) · [Build & flash](#build--flash) · [Streaming format](#streaming-format)
 
 ---
@@ -139,22 +141,41 @@ Two parts, no screws: a **box** (pick one style) and a **lid** that snaps in and
 Outside size **49.3 × 83.8 × 43.4 mm**, walls 1.6 mm, inside depth 41.8 mm (room for dupont plugs).
 Both boxes have the same openings: USB-C (low) + OBD cable hole (above) on the left and right ends, a USB-C + OBD pair in the bottom edge, a USB-C + OBD pair in the back, and a buzzer grille. Use whichever opening fits how you mount it.
 
+### Assembled
+
+<table>
+<tr><th>Vents box + shifted lid</th><th>Honeycomb box + shifted lid</th></tr>
+<tr>
+<td><img src="docs/images/case/assembled_vents.png" width="420"></td>
+<td><img src="docs/images/case/assembled_honeycomb.png" width="420"></td>
+</tr>
+</table>
+
 ### Box: two styles
 
-| Vents box: front | Vents box: back | Honeycomb box: front | Honeycomb box: back |
-|:-:|:-:|:-:|:-:|
-| ![](docs/images/case/box_vents_front.png) | ![](docs/images/case/box_vents_back.png) | ![](docs/images/case/box_honeycomb_front.png) | ![](docs/images/case/box_honeycomb_back.png) |
-| `case/v2/box_original_vents.stl` | ≈ 9.1 m PLA | `case/v2/box_honeycomb.stl` | ≈ 5.1 m PLA |
+<table>
+<tr><th>Vents box</th><th>Honeycomb box</th></tr>
+<tr>
+<td><img src="docs/images/case/box_vents_front.png" width="420"></td>
+<td><img src="docs/images/case/box_honeycomb_front.png" width="420"></td>
+</tr>
+<tr><td><code>case/v2/box_original_vents.stl</code> · ≈ 9.1 m PLA</td><td><code>case/v2/box_honeycomb.stl</code> · ≈ 5.1 m PLA</td></tr>
+</table>
 
 - **Vents box:** solid walls with rows of slot vents around the sides and back. Stronger and closed-looking.
 - **Honeycomb box:** the same box with honeycomb panels in every wall and a 1.2 mm floor. It uses about 45 % less filament and gives more airflow.
 
 ### Lid: original vs shifted window
 
-| Original lid: outside | Shifted lid: outside | Original lid: inside | Shifted lid: inside |
-|:-:|:-:|:-:|:-:|
-| ![](docs/images/case/lid_original_outside.png) | ![](docs/images/case/lid_shift_outside.png) | ![](docs/images/case/lid_original_inside.png) | ![](docs/images/case/lid_shift_inside.png) |
-| `case/archive/lid_v1_centered.stl` | **`case/v2/lid_shift5.5.stl`** ✅ | | |
+<table>
+<tr><th>Original lid (v1)</th><th>Shifted lid (v2) ✅</th><th>Shifted lid: inside</th></tr>
+<tr>
+<td><img src="docs/images/case/lid_original_outside.png" width="280"></td>
+<td><img src="docs/images/case/lid_shift_outside.png" width="280"></td>
+<td><img src="docs/images/case/lid_shift_inside.png" width="280"></td>
+</tr>
+<tr><td><code>case/archive/lid_v1_centered.stl</code></td><td><b><code>case/v2/lid_shift5.5.stl</code></b></td><td>rim, click bumps, wire gaps, dot</td></tr>
+</table>
 
 How the lid works: a 1.6 mm front plate with the screen window and a bevelled edge. On the inside, a 5.5 mm rim slides into the box (0.2 mm fit gap). The display PCB sits inside the rim, glass against the plate. Four small bumps click into grooves in the box walls. Gaps in the short ends of the rim let the display wires through. A **raised dot** inside marks the pin-header end.
 
