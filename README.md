@@ -168,13 +168,12 @@ Both boxes have the same openings: USB-C (low) + OBD cable hole (above) on the l
 ### Lid: original vs shifted window
 
 <table>
-<tr><th>Original lid (v1)</th><th>Shifted lid (v2) ✅</th><th>Shifted lid: inside</th></tr>
+<tr><th>Original lid (v1)</th><th>Shifted lid (v2) ✅</th></tr>
 <tr>
-<td><img src="docs/images/case/lid_original_outside.png" width="280"></td>
-<td><img src="docs/images/case/lid_shift_outside.png" width="280"></td>
-<td><img src="docs/images/case/lid_shift_inside.png" width="280"></td>
+<td><img src="docs/images/case/lid_original_outside.png" width="420"></td>
+<td><img src="docs/images/case/lid_shift_outside.png" width="420"></td>
 </tr>
-<tr><td><code>case/archive/lid_v1_centered.stl</code></td><td><b><code>case/v2/lid_shift5.5.stl</code></b></td><td>rim, click bumps, wire gaps, dot</td></tr>
+<tr><td><code>case/archive/lid_v1_centered.stl</code></td><td><b><code>case/v2/lid_shift5.5.stl</code></b></td></tr>
 </table>
 
 How the lid works: a 1.6 mm front plate with the screen window and a bevelled edge. On the inside, a 5.5 mm rim slides into the box (0.2 mm fit gap). The display PCB sits inside the rim, glass against the plate. Four small bumps click into grooves in the box walls. Gaps in the short ends of the rim let the display wires through. On the v2 lid, a **raised dot** inside marks the pin-header end.
