@@ -95,6 +95,8 @@ void loadSettings() {
   cfg.streamInterval = prefs.getUShort("sint", 10);
   cfg.logInterval    = prefs.getUShort("lint", 5);
   cfg.logDemo        = prefs.getBool("ldemo", true);
+  cfg.touchOn        = prefs.getBool("touch", true);
+  cfg.repaintSec     = prefs.getUShort("rpnt", 0);
   cfg.trackedCount   = parseHexList(prefs.getString("track", "0C,0D,05,11,04,0F,42"), cfg.tracked, MAX_TRACKED);
   cfg.favCount       = parseHexList(prefs.getString("favs", "0C,0D,05,42"), cfg.favs, MAX_FAVS);
   cfg.ruleCount      = parseRules(prefs.getString("rules", "05>105"), cfg.rules, MAX_RULES);
@@ -121,6 +123,8 @@ void saveSettingsUnlocked() {
   prefs.putUShort("sint", cfg.streamInterval);
   prefs.putUShort("lint", cfg.logInterval);
   prefs.putBool("ldemo", cfg.logDemo);
+  prefs.putBool("touch", cfg.touchOn);
+  prefs.putUShort("rpnt", cfg.repaintSec);
   prefs.putString("track", hexList(cfg.tracked, cfg.trackedCount));
   prefs.putString("favs", hexList(cfg.favs, cfg.favCount));
   prefs.putString("rules", rulesToString());

@@ -37,6 +37,8 @@ struct Settings {
   uint16_t streamInterval;   // seconds
   uint16_t logInterval;      // seconds
   bool     logDemo;
+  bool     touchOn;          // false = never talk to the touch chip
+  uint16_t repaintSec;       // 0 = off, else re-start + redraw the display every N seconds
   uint8_t  tracked[MAX_TRACKED]; uint8_t trackedCount;
   uint8_t  favs[MAX_FAVS];       uint8_t favCount;
   Rule     rules[MAX_RULES];     uint8_t ruleCount;

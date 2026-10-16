@@ -1,6 +1,6 @@
 /*
   =====================================================================
-   ESP32 OBD-II Monitor  v3.2
+   ESP32 OBD-II Monitor  v3.3
   =====================================================================
    - Reads OBD-II over CAN (SN65HVD230), DEMO data when no car answers
    - Own WiFi hotspot with a web panel:  http://192.168.4.1

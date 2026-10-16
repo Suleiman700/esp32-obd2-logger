@@ -437,7 +437,24 @@ void nextPage() {
   Serial.printf("Page -> %s\n", pageNames[currentPage]);
 }
 
+// Re-start the display controller and redraw everything.
+// Recovers a white / garbled screen caused by electrical noise without restarting the ESP32.
+volatile bool repaintRequest = false;
+void repaintDisplay() {
+  tft.init();
+  tft.setRotation(SCREEN_ROTATION);
+  tft.fillScreen(C_BG);
+  needsFullRedraw = true;
+}
+
 void displayLoop() {
+  static uint32_t lastRepaint = 0;
+  if (repaintRequest || (cfg.repaintSec && millis() - lastRepaint >= (uint32_t)cfg.repaintSec * 1000UL)) {
+    if (repaintRequest) Serial.println("Display repaint (web panel)");
+    repaintRequest = false;
+    lastRepaint = millis();
+    repaintDisplay();
+  }
   static uint32_t lastUpd = 0;
   static int lastMode = -1;
   if (needsFullRedraw) {
@@ -516,9 +533,25 @@ long mapAxis(uint16_t raw, uint16_t r0, uint16_t r1, int s0, int s1) {
 }
 
 // Screen position of the current press. false = not pressed
+bool touchStuck = false;      // pressed non-stop (case lid pressing the screen?) -> ignored
 bool readTouch(uint16_t& x, uint16_t& y) {
+  if (!cfg.touchOn) return false;                  // touch switched off in the web panel
+  static uint32_t pressStart = 0, releaseAt = 0;
   uint16_t rx, ry, z;
-  if (!touchRaw(rx, ry, z)) return false;
+  bool down = touchRaw(rx, ry, z);
+  if (!down) {
+    pressStart = 0;
+    if (touchStuck && !releaseAt) releaseAt = millis();
+    if (touchStuck && millis() - releaseAt > 1000) { touchStuck = false; Serial.println("Touch released - touch active again"); }
+    return false;
+  }
+  releaseAt = 0;
+  if (!pressStart) pressStart = millis();
+  if (!touchStuck && millis() - pressStart > 8000) {
+    touchStuck = true;
+    Serial.println("Touch pressed non-stop for 8 s - ignoring it (is the case lid pressing the screen?)");
+  }
+  if (touchStuck) return false;
   uint16_t ax = tcal.xAxis ? ry : rx, ay = tcal.xAxis ? rx : ry;
   long sx = constrain(mapAxis(ax, tcal.xa, tcal.xb, CAL_INSET, SW - CAL_INSET), 0, SW - 1);
   long sy = constrain(mapAxis(ay, tcal.ya, tcal.yb, CAL_INSET, SH - CAL_INSET), 0, SH - 1);

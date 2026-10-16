@@ -238,6 +238,7 @@ To change sizes, edit the numbers at the top of the scripts in `case/v2/` and ru
 2. Install the **TFT_eSPI** library and replace its `User_Setup.h` with [`firmware/tft_espi_setup/User_Setup.h`](firmware/tft_espi_setup/User_Setup.h).
 3. Open `firmware/obd_monitor/obd_monitor.ino` and upload.
 4. Picture upside down? Set `SCREEN_ROTATION 3` in `config.h`.
+   Screen glitches (garbage / white)? Use **10 MHz** in `User_Setup.h` (default now; try 5 MHz with long wires), keep SCK/MOSI wires short, and in the web panel **Settings → Screen** you can turn touch off or enable **Auto repaint**. **Repaint screen now** re-starts the display without rebooting.
    Touch not working or taps land in the wrong place? Calibrate (press 3 crosses): web panel **Settings → Calibrate touch screen**, or hold the push button 2 s while powering on, or WIFI page → **Touch cal.** Live touch values: `http://192.168.4.1/api/touch`.
 
 ## Streaming format

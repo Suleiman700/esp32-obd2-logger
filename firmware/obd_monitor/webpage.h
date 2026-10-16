@@ -76,10 +76,13 @@ h2{font-size:15px;margin:22px 0 4px}h2:first-child{margin-top:0}
 <label class="f">Save a sample every</label><select id="log_int" class="full"><option value="1">1 second</option><option value="2">2 seconds</option><option value="5">5 seconds</option><option value="10">10 seconds</option><option value="30">30 seconds</option><option value="60">1 minute</option></select>
 <label class="f">Alerts URL (receives JSON POST)</label><input id="alert_url" class="full" placeholder="http://192.168.1.10:1880/obd-alert">
 <div class="row"><input type="checkbox" id="log_demo"><span class="msg" style="margin:0">Also save/stream DEMO data (for testing)</span></div>
+<h2>Screen</h2>
+<div class="row"><input type="checkbox" id="touch_on"><span class="msg" style="margin:0">Touch screen on</span></div>
+<label class="f">Auto repaint (re-starts the display to clear glitches)</label><select id="repaint" class="full"><option value="0">Off</option><option value="30">Every 30 seconds</option><option value="60">Every minute</option><option value="300">Every 5 minutes</option></select>
 <div class="row"><button class="btn" onclick="saveSettings()">Save settings</button><span id="setmsg" class="msg"></span></div>
 <h2>Stored data</h2><p class="msg" id="loginfo"></p>
 <button class="btn bad" onclick="clearLog()">Delete stored log</button>
-<h2>Touch screen</h2><p class="msg">Touch not working or taps land in the wrong place? Start calibration here, then press the 3 crosses on the screen. Live touch values: <a href="/api/touch" target="_blank" style="color:var(--acc)">/api/touch</a></p><button class="btn" onclick="touchCal()">Calibrate touch screen</button>
+<h2>Touch screen</h2><p class="msg">Touch not working or taps land in the wrong place? Start calibration here, then press the 3 crosses on the screen. Live touch values: <a href="/api/touch" target="_blank" style="color:var(--acc)">/api/touch</a></p><button class="btn" onclick="touchCal()">Calibrate touch screen</button> <button class="btn sec" onclick="repaint()">Repaint screen now</button>
 </div></section>
 </main>
 <script>
@@ -164,19 +167,20 @@ async function addLog(){
 async function loadCfg(){
   cfg=await getJ('/api/config');
   ['wifi_ssid','ap_ssid','ap_pass','stream_url','alert_url'].forEach(k=>$(k).value=cfg[k]||'');
-  $('stream_int').value=cfg.stream_int;$('log_int').value=cfg.log_int;$('log_demo').checked=cfg.log_demo;
+  $('stream_int').value=cfg.stream_int;$('log_int').value=cfg.log_int;$('log_demo').checked=cfg.log_demo;$('touch_on').checked=cfg.touch_on;$('repaint').value=String(cfg.repaint);
   $('passhint').textContent=cfg.wifi_pass_set?'(saved)':'';$('wifi_pass').value='';$('wifi_open').checked=false;
 }
 async function saveSettings(){
   const ap=$('ap_pass').value;
   if(ap.length>0&&ap.length<8){$('setmsg').textContent='Hotspot password needs 8+ characters';return;}
-  const d={wifi_ssid:$('wifi_ssid').value,ap_ssid:$('ap_ssid').value,ap_pass:ap,stream_url:$('stream_url').value,alert_url:$('alert_url').value,stream_int:$('stream_int').value,log_int:$('log_int').value,log_demo:$('log_demo').checked?1:0};
+  const d={wifi_ssid:$('wifi_ssid').value,ap_ssid:$('ap_ssid').value,ap_pass:ap,stream_url:$('stream_url').value,alert_url:$('alert_url').value,stream_int:$('stream_int').value,log_int:$('log_int').value,log_demo:$('log_demo').checked?1:0,touch_on:$('touch_on').checked?1:0,repaint:$('repaint').value};
   if($('wifi_open').checked)d.wifi_pass='';else if($('wifi_pass').value)d.wifi_pass=$('wifi_pass').value;
   const apChanged=d.ap_ssid!==cfg.ap_ssid||d.ap_pass!==cfg.ap_pass;
   const r=await post('/api/config',d);
   $('setmsg').textContent=r.ok?('Saved ✓'+(apChanged?' - hotspot is restarting, reconnect your phone to "'+d.ap_ssid+'"':'')):(r.error||'Error');
   if(r.ok)loadCfg();
 }
+async function repaint(){const r=await post('/api/repaint');if(!r.ok)alert('Error');}
 async function touchCal(){const r=await post('/api/touchcal');alert(r.ok?'Look at the device screen and press the 3 crosses':'Error');}
 async function clearLog(){if(!confirm('Delete all stored data that was not uploaded yet?'))return;const r=await post('/api/clearlog');alert(r.ok?'Deleted':'Error');}
 

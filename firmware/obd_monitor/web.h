@@ -116,6 +116,8 @@ void handleGetConfig() {
   j += "\",\"stream_int\":";   j += cfg.streamInterval;
   j += ",\"log_int\":";        j += cfg.logInterval;
   j += ",\"log_demo\":";       j += cfg.logDemo ? "true" : "false";
+  j += ",\"touch_on\":";       j += cfg.touchOn ? "true" : "false";
+  j += ",\"repaint\":";        j += cfg.repaintSec;
   j += ",\"tracked\":\"";      j += hexList(cfg.tracked, cfg.trackedCount);
   j += "\",\"favs\":\"";       j += hexList(cfg.favs, cfg.favCount);
   j += "\",\"rules\":\"";      j += rulesToString();
@@ -161,6 +163,11 @@ void handlePostConfig() {
     cfg.logInterval = (uint16_t)(v < 1 ? 1 : (v > 3600 ? 3600 : v));
   }
   if (server.hasArg("log_demo")) cfg.logDemo = server.arg("log_demo") == "1";
+  if (server.hasArg("touch_on")) cfg.touchOn = server.arg("touch_on") == "1";
+  if (server.hasArg("repaint")) {
+    long v = server.arg("repaint").toInt();
+    cfg.repaintSec = (uint16_t)(v < 0 ? 0 : (v > 3600 ? 3600 : v));
+  }
   if (server.hasArg("tracked")) cfg.trackedCount = parseHexList(server.arg("tracked"), cfg.tracked, MAX_TRACKED);
   if (server.hasArg("favs"))    cfg.favCount = parseHexList(server.arg("favs"), cfg.favs, MAX_FAVS);
   if (server.hasArg("rules")) {
@@ -225,6 +232,11 @@ void handleQuery() {
   sendJson(j);
 }
 
+void handleRepaint() {
+  repaintRequest = true;
+  sendJson("{\"ok\":true}");
+}
+
 void handleTouchCal() {
   touchCalRequest = true;
   sendJson("{\"ok\":true}");
@@ -241,6 +253,8 @@ void handleTouchInfo() {
   j += ",\"x\":";    j += lastTouchX;
   j += ",\"y\":";    j += lastTouchY;
   j += ",\"calibrated\":"; j += tcal.valid ? "true" : "false";
+  j += ",\"enabled\":"; j += cfg.touchOn ? "true" : "false";
+  j += ",\"stuck\":"; j += touchStuck ? "true" : "false";
   j += "}";
   sendJson(j);
 }
@@ -265,6 +279,7 @@ void webBegin() {
   server.on("/api/ack", HTTP_POST, handleAck);
   server.on("/api/clearlog", HTTP_POST, handleClearLog);
   server.on("/api/touchcal", HTTP_POST, handleTouchCal);
+  server.on("/api/repaint", HTTP_POST, handleRepaint);
   server.on("/api/touch", HTTP_GET, handleTouchInfo);
   server.onNotFound([]() { server.sendHeader("Location", "/"); server.send(302, "text/plain", ""); });
   server.begin();
