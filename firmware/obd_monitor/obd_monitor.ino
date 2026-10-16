@@ -1,6 +1,6 @@
 /*
   =====================================================================
-   ESP32 OBD-II Monitor  v3.4
+   ESP32 OBD-II Monitor  v3.5
   =====================================================================
    - Reads OBD-II over CAN (SN65HVD230), DEMO data when no car answers
    - Own WiFi hotspot with a web panel:  http://192.168.4.1
@@ -23,7 +23,7 @@
      CAN TX   -> GPIO 16 (RX2), CAN RX -> GPIO 5
      CANH/CANL-> OBD pin 6 / pin 14, ESP32 GND -> OBD pin 5
 
-   Tip: hold the push button while powering on to calibrate the touch screen.
+   Touch calibration: web panel -> Settings -> Calibrate touch screen.
 */
 
 #include <Arduino.h>
@@ -39,22 +39,37 @@
 #include "touchui.h"
 #include "web.h"
 
-// Push button: debounced, one action per press
-//  - setup screen open -> cancel it
-//  - alarm sounding    -> silence
-//  - otherwise         -> next page
+// Push button with noise protection (long wires in a car pick up noise)
+//  - a press counts only if the button was released for >= 200 ms before
+//    and is then held for >= 80 ms (short glitches are ignored)
+//  - held / shorted for more than 3 s = stuck -> ignored until released for 1 s
+//  - one action per press:  setup screen open -> cancel,  alarm -> silence,  otherwise -> next page
 void handleButton() {
-  static bool stableState = HIGH, lastReading = HIGH;
-  static uint32_t lastChange = 0;
-  bool reading = digitalRead(BUTTON_PIN);
-  if (reading != lastReading) { lastChange = millis(); lastReading = reading; }
-  if (millis() - lastChange > 50 && reading != stableState) {
-    stableState = reading;
-    if (stableState == LOW) {
-      if (uiMode != UI_NORMAL) leaveUi();
-      else if (buzzerShouldSound()) ackAlerts();
-      else nextPage();
-    }
+  static uint32_t highSince = 0, lowSince = 0;
+  static bool armed = false, fired = false;
+  uint32_t now = millis();
+  bool low = digitalRead(BUTTON_PIN) == LOW;
+  if (!low) {
+    if (lowSince) { lowSince = 0; highSince = now; }       // just released
+    if (!highSince) highSince = now;
+    fired = false;
+    if (buttonStuck && now - highSince > 1000) { buttonStuck = false; Serial.println("Button released - active again"); }
+    return;
+  }
+  if (!lowSince) {                                         // just went low
+    lowSince = now;
+    armed = highSince && (now - highSince >= 200);
+  }
+  if (!buttonStuck && now - lowSince > 3000) {
+    buttonStuck = true;
+    Serial.println("Button pin LOW for 3 s - ignoring it (button stuck or wire shorted to GND?)");
+  }
+  if (!cfg.buttonOn || buttonStuck || fired || !armed) return;
+  if (now - lowSince >= 80) {
+    fired = true;
+    if (uiMode != UI_NORMAL) leaveUi();
+    else if (buzzerShouldSound()) ackAlerts();
+    else nextPage();
   }
 }
 
@@ -75,17 +90,8 @@ void setup() {
   rebuildPollList();
   loadTouchCal();
 
-  // Button held for 2 seconds at power-on -> touch calibration
-  delay(50);
-  if (digitalRead(BUTTON_PIN) == LOW) {
-    splash("Keep holding for touch calibration...");
-    uint32_t t0 = millis();
-    while (digitalRead(BUTTON_PIN) == LOW && millis() - t0 < 2000) delay(10);
-    if (millis() - t0 >= 2000) {
-      while (digitalRead(BUTTON_PIN) == LOW) delay(10);   // wait for release
-      runTouchCalibration();
-    }
-  }
+  // (touch calibration is started only from the web panel - never automatically at power-on)
+  Serial.printf("Button pin at boot: %s\n", digitalRead(BUTTON_PIN) ? "HIGH (released)" : "LOW (pressed or shorted to GND!)");
   Serial.printf("Touch raw Z at boot: %u (0 = not pressed or no reply; press the screen to see values)\n", tft.getTouchRawZ());
 
   splash("Starting CAN bus...");

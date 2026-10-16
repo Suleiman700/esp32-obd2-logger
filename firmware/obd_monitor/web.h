@@ -118,6 +118,7 @@ void handleGetConfig() {
   j += ",\"log_int\":";        j += cfg.logInterval;
   j += ",\"log_demo\":";       j += cfg.logDemo ? "true" : "false";
   j += ",\"touch_on\":";       j += cfg.touchOn ? "true" : "false";
+  j += ",\"button_on\":";      j += cfg.buttonOn ? "true" : "false";
   j += ",\"repaint\":";        j += cfg.repaintSec;
   j += ",\"tracked\":\"";      j += hexList(cfg.tracked, cfg.trackedCount);
   j += "\",\"favs\":\"";       j += hexList(cfg.favs, cfg.favCount);
@@ -165,6 +166,7 @@ void handlePostConfig() {
   }
   if (server.hasArg("log_demo")) cfg.logDemo = server.arg("log_demo") == "1";
   if (server.hasArg("touch_on")) cfg.touchOn = server.arg("touch_on") == "1";
+  if (server.hasArg("button_on")) cfg.buttonOn = server.arg("button_on") == "1";
   if (server.hasArg("repaint")) {
     long v = server.arg("repaint").toInt();
     cfg.repaintSec = (uint16_t)(v < 0 ? 0 : (v > 3600 ? 3600 : v));
@@ -256,6 +258,8 @@ void handleTouchInfo() {
   j += ",\"calibrated\":"; j += tcal.valid ? "true" : "false";
   j += ",\"enabled\":"; j += cfg.touchOn ? "true" : "false";
   j += ",\"stuck\":"; j += touchStuck ? "true" : "false";
+  j += ",\"button\":\""; j += digitalRead(BUTTON_PIN) ? "released" : "PRESSED/LOW";
+  j += "\",\"button_stuck\":"; j += buttonStuck ? "true" : "false";
   j += "}";
   sendJson(j);
 }

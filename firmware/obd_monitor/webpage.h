@@ -78,11 +78,12 @@ h2{font-size:15px;margin:22px 0 4px}h2:first-child{margin-top:0}
 <div class="row"><input type="checkbox" id="log_demo"><span class="msg" style="margin:0">Also save/stream DEMO data (for testing)</span></div>
 <h2>Screen</h2>
 <div class="row"><input type="checkbox" id="touch_on"><span class="msg" style="margin:0">Touch screen on</span></div>
+<div class="row"><input type="checkbox" id="button_on"><span class="msg" style="margin:0">Push button on</span></div>
 <label class="f">Auto repaint (re-starts the display to clear glitches)</label><select id="repaint" class="full"><option value="0">Off</option><option value="30">Every 30 seconds</option><option value="60">Every minute</option><option value="300">Every 5 minutes</option></select>
 <div class="row"><button class="btn" onclick="saveSettings()">Save settings</button><span id="setmsg" class="msg"></span></div>
 <h2>Stored data</h2><p class="msg" id="loginfo"></p>
 <button class="btn bad" onclick="clearLog()">Delete stored log</button>
-<h2>Touch screen</h2><p class="msg">Touch not working or taps land in the wrong place? Start calibration here, then press the 3 crosses on the screen. Live touch values: <a href="/api/touch" target="_blank" style="color:var(--acc)">/api/touch</a></p><button class="btn" onclick="touchCal()">Calibrate touch screen</button> <button class="btn sec" onclick="repaint()">Repaint screen now</button>
+<h2>Touch screen</h2><p class="msg">Touch not working or taps land in the wrong place? Start calibration here, then press the 3 crosses on the screen. Live touch + button state: <a href="/api/touch" target="_blank" style="color:var(--acc)">/api/touch</a></p><button class="btn" onclick="touchCal()">Calibrate touch screen</button> <button class="btn sec" onclick="repaint()">Repaint screen now</button>
 <h2>Firmware update (over WiFi)</h2><p class="msg">Choose the <b>.bin</b> file (obd_monitor_vX.X_ota.bin) and enter the hotspot password. Keep the phone close; the device restarts when done. Current version: <span id="fwver"></span></p>
 <input type="file" id="fwfile" accept=".bin" class="full"><input id="fwkey" class="full" type="password" placeholder="hotspot password" style="margin-top:8px">
 <div class="row"><button class="btn" onclick="fwUpload()">Upload firmware</button><span id="fwmsg" class="msg"></span></div>
@@ -170,13 +171,13 @@ async function addLog(){
 async function loadCfg(){
   cfg=await getJ('/api/config');
   ['wifi_ssid','ap_ssid','ap_pass','stream_url','alert_url'].forEach(k=>$(k).value=cfg[k]||'');
-  $('stream_int').value=cfg.stream_int;$('log_int').value=cfg.log_int;$('log_demo').checked=cfg.log_demo;$('touch_on').checked=cfg.touch_on;$('fwver').textContent=cfg.fw||'?';$('repaint').value=String(cfg.repaint);
+  $('stream_int').value=cfg.stream_int;$('log_int').value=cfg.log_int;$('log_demo').checked=cfg.log_demo;$('touch_on').checked=cfg.touch_on;$('button_on').checked=cfg.button_on;$('fwver').textContent=cfg.fw||'?';$('repaint').value=String(cfg.repaint);
   $('passhint').textContent=cfg.wifi_pass_set?'(saved)':'';$('wifi_pass').value='';$('wifi_open').checked=false;
 }
 async function saveSettings(){
   const ap=$('ap_pass').value;
   if(ap.length>0&&ap.length<8){$('setmsg').textContent='Hotspot password needs 8+ characters';return;}
-  const d={wifi_ssid:$('wifi_ssid').value,ap_ssid:$('ap_ssid').value,ap_pass:ap,stream_url:$('stream_url').value,alert_url:$('alert_url').value,stream_int:$('stream_int').value,log_int:$('log_int').value,log_demo:$('log_demo').checked?1:0,touch_on:$('touch_on').checked?1:0,repaint:$('repaint').value};
+  const d={wifi_ssid:$('wifi_ssid').value,ap_ssid:$('ap_ssid').value,ap_pass:ap,stream_url:$('stream_url').value,alert_url:$('alert_url').value,stream_int:$('stream_int').value,log_int:$('log_int').value,log_demo:$('log_demo').checked?1:0,touch_on:$('touch_on').checked?1:0,button_on:$('button_on').checked?1:0,repaint:$('repaint').value};
   if($('wifi_open').checked)d.wifi_pass='';else if($('wifi_pass').value)d.wifi_pass=$('wifi_pass').value;
   const apChanged=d.ap_ssid!==cfg.ap_ssid||d.ap_pass!==cfg.ap_pass;
   const r=await post('/api/config',d);

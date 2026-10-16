@@ -1,4 +1,4 @@
-ESP32 OBD-II MONITOR v3.1 - SETUP & USE
+ESP32 OBD-II MONITOR v3.5 - SETUP & USE
 ========================================
 
 INSTALL
@@ -23,7 +23,6 @@ FIRST USE
     WIFI page -> "Change WiFi" -> tap network -> type password -> Connect
   - Touch not working / taps in the wrong place? Calibrate (press 3 crosses):
       * web panel: Settings -> "Calibrate touch screen", or
-      * hold the push button 2 s while powering on, or
       * WIFI page -> "Touch cal."
     Live touch values: http://192.168.4.1/api/touch (press the screen and refresh)
     Serial Monitor also prints every touch: raw x/y/z and screen position.

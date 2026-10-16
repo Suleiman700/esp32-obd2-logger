@@ -38,6 +38,7 @@ struct Settings {
   uint16_t logInterval;      // seconds
   bool     logDemo;
   bool     touchOn;          // false = never talk to the touch chip
+  bool     buttonOn;         // false = ignore the push button
   uint16_t repaintSec;       // 0 = off, else re-start + redraw the display every N seconds
   uint8_t  tracked[MAX_TRACKED]; uint8_t trackedCount;
   uint8_t  favs[MAX_FAVS];       uint8_t favCount;
@@ -46,6 +47,7 @@ struct Settings {
 Settings   cfg;
 AlertState alertState[MAX_RULES];
 
+bool     buttonStuck     = false;    // button pin LOW for > 3 s -> ignored
 volatile bool otaRunning = false;   // firmware update in progress -> storage task pauses
 uint32_t restartAt       = 0;        // reboot after a firmware update
 bool     demoMode        = true;    // no car seen since power-on -> fake data

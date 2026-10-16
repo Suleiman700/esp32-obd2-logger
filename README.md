@@ -34,7 +34,7 @@ It reads live engine data and shows it on a 2.4" touch screen. It runs its own *
 | your 6 favourite PIDs | rules + current values | hotspot, WiFi, stream, log status | join a network from the screen |
 
 **Header icons:** mode badge · spinner (turns while the program runs) · save icon (orange while writing to flash) · WiFi bars + ✓ connected / spinner connecting / ✕ not connected.
-**Push button:** next page, or silences the buzzer while an alert is beeping.
+**Push button:** next page, or silences the buzzer while an alert is beeping. Noise-protected; a button held/shorted for 3 s is ignored. Can be switched off in Settings → Screen.
 
 ---
 
@@ -239,15 +239,15 @@ To change sizes, edit the numbers at the top of the scripts in `case/v2/` and ru
 3. Open `firmware/obd_monitor/obd_monitor.ino` and upload.
 4. Picture upside down? Set `SCREEN_ROTATION 3` in `config.h`.
    Screen glitches (garbage / white)? Use **10 MHz** in `User_Setup.h` (default now; try 5 MHz with long wires), keep SCK/MOSI wires short, and in the web panel **Settings → Screen** you can turn touch off or enable **Auto repaint**. **Repaint screen now** re-starts the display without rebooting.
-   Touch not working or taps land in the wrong place? Calibrate (press 3 crosses): web panel **Settings → Calibrate touch screen**, or hold the push button 2 s while powering on, or WIFI page → **Touch cal.** Live touch values: `http://192.168.4.1/api/touch`.
+   Touch not working or taps land in the wrong place? Calibrate (press 3 crosses): web panel **Settings → Calibrate touch screen** or WIFI page → **Touch cal.** (never started automatically) Live touch values: `http://192.168.4.1/api/touch`.
 
 ## Updating the firmware over WiFi (OTA)
 From v3.4 the firmware can be updated **from your phone, no cable**:
 web panel → **Settings → Firmware update (over WiFi)** → choose `obd_monitor_vX.X_ota.bin` → enter the hotspot password → **Upload firmware**. The screen shows the progress and the device restarts.
 
 Ready-made binaries are in [`firmware/bin/`](firmware/bin/) (see `FLASHING.txt`):
-- `obd_monitor_v3.4_FULL_flash_at_0x0.bin`: first install over USB, flash at **0x0** with any Chrome/Edge browser at https://espressif.github.io/esptool-js/ (no Arduino IDE needed)
-- `obd_monitor_v3.4_ota.bin`: updates over WiFi from the web panel
+- `obd_monitor_v3.5_FULL_flash_at_0x0.bin`: first install over USB, flash at **0x0** with any Chrome/Edge browser at https://espressif.github.io/esptool-js/ (no Arduino IDE needed)
+- `obd_monitor_v3.5_ota.bin`: updates over WiFi from the web panel
 
 ## Streaming format
 Data URL (every *Send every* seconds, up to 40 records per POST):
