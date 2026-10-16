@@ -414,6 +414,7 @@ void drainAlertQueue() {
 void storageTask(void*) {
   uint32_t lastCache = 0;
   for (;;) {
+    if (otaRunning) { vTaskDelay(pdMS_TO_TICKS(100)); continue; }   // no flash writes during an update
     if (clearRequested) { doClearStoredData(); clearRequested = false; }
     loggerLoop();
     drainAlertQueue();

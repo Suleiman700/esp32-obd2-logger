@@ -1,5 +1,6 @@
 #pragma once
 #include <WebServer.h>
+#include <Update.h>
 #include "display.h"
 #include "webpage.h"
 
@@ -107,7 +108,7 @@ void handlePids() {
 // ---------- /api/config ----------
 void handleGetConfig() {
   String j;
-  j += "{\"wifi_ssid\":\""; j += jsonEsc(cfg.wifiSsid);
+  j += "{\"fw\":\"" FW_VERSION "\",\"wifi_ssid\":\""; j += jsonEsc(cfg.wifiSsid);
   j += "\",\"wifi_pass_set\":"; j += cfg.wifiPass.length() ? "true" : "false";
   j += ",\"ap_ssid\":\"";   j += jsonEsc(cfg.apSsid);
   j += "\",\"ap_pass\":\""; j += jsonEsc(cfg.apPass);
@@ -259,6 +260,70 @@ void handleTouchInfo() {
   sendJson(j);
 }
 
+// ---------- firmware update over WiFi (OTA) ----------
+// Upload obd_monitor.ino.bin from the web panel (Settings -> Firmware update).
+// Protected with the hotspot password (?key=...).
+bool   otaAuthOk = false;
+String otaError;
+
+void otaScreen(const char* msg, int pct) {
+  tft.fillScreen(C_BG);
+  tft.setTextDatum(MC_DATUM);
+  tft.setTextColor(C_TEXT, C_BG);
+  tft.drawString("Firmware update", SW / 2, 80, 4);
+  tft.setTextColor(C_LABEL, C_BG);
+  tft.drawString(msg, SW / 2, 115, 2);
+  if (pct >= 0) {
+    tft.drawRect(40, 140, SW - 80, 16, C_LABEL);
+    tft.fillRect(42, 142, (SW - 84) * pct / 100, 12, C_ACCENT);
+  }
+}
+
+void handleUpdateUpload() {
+  HTTPUpload& up = server.upload();
+  static size_t total = 0;
+  static int lastPct = -1;
+  if (up.status == UPLOAD_FILE_START) {
+    otaAuthOk = cfg.apPass.length() < 8 || server.arg("key") == cfg.apPass;
+    otaError = "";
+    total = 0; lastPct = -1;
+    if (!otaAuthOk) { otaError = "Wrong password (use the hotspot password)"; return; }
+    size_t len = server.hasArg("len") ? (size_t)server.arg("len").toInt() : 0;
+    otaRunning = true;
+    Serial.printf("OTA start: %s (%u bytes)\n", up.filename.c_str(), (unsigned)len);
+    otaScreen("Receiving new firmware...", 0);
+    if (!Update.begin(len ? len : UPDATE_SIZE_UNKNOWN, U_FLASH)) otaError = Update.errorString();
+  } else if (up.status == UPLOAD_FILE_WRITE) {
+    if (!otaAuthOk || otaError.length()) return;
+    if (Update.write(up.buf, up.currentSize) != up.currentSize) { otaError = Update.errorString(); return; }
+    total += up.currentSize;
+    size_t len = server.hasArg("len") ? (size_t)server.arg("len").toInt() : 0;
+    int pct = len ? (int)(total * 100 / len) : 0;
+    if (pct != lastPct && pct % 5 == 0) { lastPct = pct; otaScreen("Receiving new firmware...", pct); }
+  } else if (up.status == UPLOAD_FILE_END) {
+    if (!otaAuthOk || otaError.length()) return;
+    if (!Update.end(true)) otaError = Update.errorString();
+    Serial.printf("OTA end: %u bytes, %s\n", (unsigned)total, otaError.length() ? otaError.c_str() : "OK");
+  } else if (up.status == UPLOAD_FILE_ABORTED) {
+    Update.abort();
+    otaError = "Upload aborted";
+  }
+}
+
+void handleUpdateDone() {
+  if (otaAuthOk && !otaError.length() && !Update.hasError()) {
+    otaScreen("Done - restarting...", 100);
+    sendJson("{\"ok\":true}");
+    restartAt = millis() + 1500;
+  } else {
+    otaRunning = false;
+    if (!otaError.length()) otaError = "Update failed";
+    Serial.printf("OTA failed: %s\n", otaError.c_str());
+    sendError(otaError);
+    needsFullRedraw = true;
+  }
+}
+
 void handleAck() {
   ackAlerts();
   sendJson("{\"ok\":true}");
@@ -280,6 +345,7 @@ void webBegin() {
   server.on("/api/clearlog", HTTP_POST, handleClearLog);
   server.on("/api/touchcal", HTTP_POST, handleTouchCal);
   server.on("/api/repaint", HTTP_POST, handleRepaint);
+  server.on("/update", HTTP_POST, handleUpdateDone, handleUpdateUpload);
   server.on("/api/touch", HTTP_GET, handleTouchInfo);
   server.onNotFound([]() { server.sendHeader("Location", "/"); server.send(302, "text/plain", ""); });
   server.begin();

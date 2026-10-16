@@ -83,6 +83,9 @@ h2{font-size:15px;margin:22px 0 4px}h2:first-child{margin-top:0}
 <h2>Stored data</h2><p class="msg" id="loginfo"></p>
 <button class="btn bad" onclick="clearLog()">Delete stored log</button>
 <h2>Touch screen</h2><p class="msg">Touch not working or taps land in the wrong place? Start calibration here, then press the 3 crosses on the screen. Live touch values: <a href="/api/touch" target="_blank" style="color:var(--acc)">/api/touch</a></p><button class="btn" onclick="touchCal()">Calibrate touch screen</button> <button class="btn sec" onclick="repaint()">Repaint screen now</button>
+<h2>Firmware update (over WiFi)</h2><p class="msg">Choose the <b>.bin</b> file (obd_monitor_vX.X_ota.bin) and enter the hotspot password. Keep the phone close; the device restarts when done. Current version: <span id="fwver"></span></p>
+<input type="file" id="fwfile" accept=".bin" class="full"><input id="fwkey" class="full" type="password" placeholder="hotspot password" style="margin-top:8px">
+<div class="row"><button class="btn" onclick="fwUpload()">Upload firmware</button><span id="fwmsg" class="msg"></span></div>
 </div></section>
 </main>
 <script>
@@ -167,7 +170,7 @@ async function addLog(){
 async function loadCfg(){
   cfg=await getJ('/api/config');
   ['wifi_ssid','ap_ssid','ap_pass','stream_url','alert_url'].forEach(k=>$(k).value=cfg[k]||'');
-  $('stream_int').value=cfg.stream_int;$('log_int').value=cfg.log_int;$('log_demo').checked=cfg.log_demo;$('touch_on').checked=cfg.touch_on;$('repaint').value=String(cfg.repaint);
+  $('stream_int').value=cfg.stream_int;$('log_int').value=cfg.log_int;$('log_demo').checked=cfg.log_demo;$('touch_on').checked=cfg.touch_on;$('fwver').textContent=cfg.fw||'?';$('repaint').value=String(cfg.repaint);
   $('passhint').textContent=cfg.wifi_pass_set?'(saved)':'';$('wifi_pass').value='';$('wifi_open').checked=false;
 }
 async function saveSettings(){
@@ -181,6 +184,14 @@ async function saveSettings(){
   if(r.ok)loadCfg();
 }
 async function repaint(){const r=await post('/api/repaint');if(!r.ok)alert('Error');}
+function fwUpload(){const f=$('fwfile').files[0];if(!f){alert('Choose the .bin file first');return;}
+ if(!confirm('Install '+f.name+' ('+Math.round(f.size/1024)+' KB)?'))return;
+ const fd=new FormData();fd.append('firmware',f,f.name);const x=new XMLHttpRequest();
+ x.open('POST','/update?key='+encodeURIComponent($('fwkey').value)+'&len='+f.size);
+ x.upload.onprogress=e=>{if(e.lengthComputable)$('fwmsg').textContent='Uploading '+Math.round(e.loaded*100/e.total)+'%';};
+ x.onload=()=>{let r={};try{r=JSON.parse(x.responseText)}catch(e){}$('fwmsg').textContent=r.ok?'Done ✓ restarting... reload in 20 s':('Failed: '+(r.error||x.status));};
+ x.onerror=()=>{$('fwmsg').textContent='Connection lost - check the screen, then reload';};
+ $('fwmsg').textContent='Uploading 0%';x.send(fd);}
 async function touchCal(){const r=await post('/api/touchcal');alert(r.ok?'Look at the device screen and press the 3 crosses':'Error');}
 async function clearLog(){if(!confirm('Delete all stored data that was not uploaded yet?'))return;const r=await post('/api/clearlog');alert(r.ok?'Deleted':'Error');}
 

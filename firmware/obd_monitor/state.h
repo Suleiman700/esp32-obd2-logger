@@ -46,6 +46,8 @@ struct Settings {
 Settings   cfg;
 AlertState alertState[MAX_RULES];
 
+volatile bool otaRunning = false;   // firmware update in progress -> storage task pauses
+uint32_t restartAt       = 0;        // reboot after a firmware update
 bool     demoMode        = true;    // no car seen since power-on -> fake data
 bool     linkLost        = false;   // car was LIVE, then stopped answering -> show last values in grey
 uint32_t lostSince       = 0;

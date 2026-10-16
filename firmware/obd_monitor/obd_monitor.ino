@@ -1,6 +1,6 @@
 /*
   =====================================================================
-   ESP32 OBD-II Monitor  v3.3
+   ESP32 OBD-II Monitor  v3.4
   =====================================================================
    - Reads OBD-II over CAN (SN65HVD230), DEMO data when no car answers
    - Own WiFi hotspot with a web panel:  http://192.168.4.1
@@ -105,6 +105,8 @@ void setup() {
 
 void loop() {
   server.handleClient();
+  if (restartAt && (int32_t)(millis() - restartAt) >= 0) ESP.restart();
+  if (otaRunning) return;              // firmware update in progress
   if (touchCalRequest) { touchCalRequest = false; if (uiMode != UI_NORMAL) leaveUi(); runTouchCalibration(); }
 
   obdLoop();
