@@ -1,0 +1,18 @@
+{
+  "device": "OBD-Monitor",
+  "type": "alert",
+  "records": [
+    {
+      "ts": 1792190471,
+      "event": "triggered",
+      "pid": "0x05",
+      "key": "coolant",
+      "name": "Coolant Temp",
+      "condition": ">",
+      "threshold": 105,
+      "value": 106.0,
+      "unit": "C",
+      "mode": "live"
+    }
+  ]
+}

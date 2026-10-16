@@ -256,11 +256,12 @@
 <text x="570" y="1032" font-size="12" font-weight="700" fill="#111" text-anchor="start"></text>
 <rect x="800" y="812" width="760" height="250" rx="10" fill="#f9fafb" stroke="#d1d5db"/>
 <text x="816" y="838" font-size="14" font-weight="700" fill="#111" text-anchor="start">Notes</text>
-<text x="816" y="864" font-size="12" font-weight="400" fill="#333" text-anchor="start">• 12V: fuse box (switched) → 18 AWG → 3A fuse → toggle switch → Cat6 orange pair. Fuse FIRST, next to the tap.</text>
-<text x="816" y="890" font-size="12" font-weight="400" fill="#333" text-anchor="start">• Set the LM2596 to 5.0–5.2 V (no load) BEFORE connecting the ESP32.</text>
-<text x="816" y="916" font-size="12" font-weight="400" fill="#333" text-anchor="start">• Shared strips: 3V3 (VCC, LED, CAN 3V3) · GND · D18 (SCK+T_CLK) · D23 (SDI+T_DIN).</text>
-<text x="816" y="942" font-size="12" font-weight="400" fill="#333" text-anchor="start">• D19 = T_DO only. D19 and D23 must never touch (white screen + fake touches).</text>
-<text x="816" y="968" font-size="12" font-weight="400" fill="#333" text-anchor="start">• Display SDO (MISO) and T_IRQ stay empty. Touch calibrate: web panel → Settings.</text>
-<text x="816" y="994" font-size="12" font-weight="400" fill="#333" text-anchor="start">• Button: internal pull-up, no resistor. Buzzer 3-pin: VCC→3V3, I/O→D25, GND→GND.</text>
-<text x="816" y="1020" font-size="12" font-weight="400" fill="#333" text-anchor="start">• OBD pin 16 is not used. Check pigtail colours against OBD pins with a meter.</text>
+<text x="816" y="862" font-size="12" font-weight="400" fill="#333" text-anchor="start">• 12V: fuse box (switched) → 18 AWG → 3A fuse → toggle switch → Cat6 orange pair. Fuse FIRST.</text>
+<text x="816" y="887" font-size="12" font-weight="400" fill="#333" text-anchor="start">• LM2596 set to 5.0–5.2 V (no load) BEFORE connecting the ESP32.</text>
+<text x="816" y="912" font-size="12" font-weight="400" fill="#333" text-anchor="start">• Shared strips: 3V3 · GND · D18 (SCK+T_CLK) · D23 (SDI+T_DIN). D19 = T_DO only.</text>
+<text x="816" y="937" font-size="12" font-weight="400" fill="#333" text-anchor="start">• D19 ↔ D23 short = white screen + fake touches. Display SDO and T_IRQ stay empty.</text>
+<text x="816" y="962" font-size="12" font-weight="400" fill="#333" text-anchor="start">• Screen glitches: SPI 10 MHz, short SCK/MOSI wires, touch OFF (web Settings → Screen).</text>
+<text x="816" y="987" font-size="12" font-weight="400" fill="#333" text-anchor="start">• Button noise: 10 kΩ D13→3V3 + 100 nF D13→GND. 4-leg button: diagonal legs.</text>
+<text x="816" y="1012" font-size="12" font-weight="400" fill="#333" text-anchor="start">• Power spikes: 470–1000 µF VIN–GND, 100 µF 3V3–GND near the display.</text>
+<text x="816" y="1037" font-size="12" font-weight="400" fill="#333" text-anchor="start">• OBD pin 16 not used. Check pigtail colours against OBD pins with a meter.</text>
 </svg>

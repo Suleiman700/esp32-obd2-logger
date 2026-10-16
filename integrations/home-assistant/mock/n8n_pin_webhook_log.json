@@ -1,0 +1,64 @@
+[
+  {
+    "headers": {
+      "content-type": "application/json",
+      "user-agent": "ESP32HTTPClient"
+    },
+    "params": {},
+    "query": {},
+    "body": {
+      "device": "OBD-Monitor",
+      "type": "log",
+      "records": [
+        {
+          "ts": 1792190451,
+          "boot": 7,
+          "uptime": 512,
+          "mode": "live",
+          "values": {
+            "rpm": 812,
+            "speed": 0,
+            "coolant": 74,
+            "throttle": 15.7,
+            "load": 21.2,
+            "intake": 31,
+            "voltage": 14.12,
+            "fuel": 62
+          }
+        },
+        {
+          "ts": 1792190461,
+          "boot": 7,
+          "uptime": 522,
+          "mode": "live",
+          "values": {
+            "rpm": 1640,
+            "speed": 28,
+            "coolant": 76,
+            "throttle": 22.4,
+            "load": 38.8,
+            "intake": 31,
+            "voltage": 14.08,
+            "fuel": 62
+          }
+        },
+        {
+          "ts": 1792190471,
+          "boot": 7,
+          "uptime": 532,
+          "mode": "live",
+          "values": {
+            "rpm": 2210,
+            "speed": 54,
+            "coolant": 78,
+            "throttle": 18.0,
+            "load": 42.0,
+            "intake": 32,
+            "voltage": 14.1,
+            "fuel": 61
+          }
+        }
+      ]
+    }
+  }
+]

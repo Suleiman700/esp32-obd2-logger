@@ -249,6 +249,19 @@ Ready-made binaries are in [`firmware/bin/`](firmware/bin/) (see `FLASHING.txt`)
 - `obd_monitor_v3.5_FULL_flash_at_0x0.bin`: first install over USB, flash at **0x0** with any Chrome/Edge browser at https://espressif.github.io/esptool-js/ (no Arduino IDE needed)
 - `obd_monitor_v3.5_ota.bin`: updates over WiFi from the web panel
 
+## Troubleshooting (lessons from the real build)
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| White screen | Display data line wrong or **D19 and D23 touching** | Check CS→D15, DC→D2, RESET→D4, SCK→D18, SDI→D23; D19↔D23 must not beep |
+| Garbage on the screen, worse when touching it | Touch chip traffic on the shared SCK/MOSI wires | SPI 10 MHz (default), short soldered SCK/MOSI wires, **touch off** in Settings → Screen |
+| Screen garbled/white after a while in the car | Electrical noise / power spikes | Auto repaint (Settings → Screen), 470–1000 µF VIN–GND + 100 µF 3V3–GND |
+| Touch does nothing | T_DIN on the wrong pin (must be D23), not calibrated | Fix wiring, Settings → Calibrate touch screen; `/api/touch` shows raw values |
+| Pages change by themselves / button dead | D13 shorted to GND or noise on a long wire | v3.5 ignores glitches & a stuck button; add 10 kΩ D13→3V3 + 100 nF D13→GND; 4-leg button: diagonal legs |
+| Stays in DEMO in the car | No CAN reply | Ignition on, CANH/CANL not swapped, same twisted pair, GND to OBD pin 5 |
+| Web flasher "Failed to connect" | ESP32 not in download mode | Baud 115200, hold BOOT while connecting (or BOOT + tap EN) |
+| No COM port on Windows | Missing USB driver | Install the CP210x (or CH340) driver |
+
 ## Streaming format
 Data URL (every *Send every* seconds, up to 40 records per POST):
 ```json
@@ -266,6 +279,7 @@ Your endpoint must answer HTTP 2xx, otherwise the data is kept and sent again. F
 
 ## Home Assistant
 Car data → n8n → Home Assistant sensors + dashboard + alert notifications: see [`integrations/home-assistant/`](integrations/home-assistant/) (importable n8n workflow + dashboard card).
+Test without the car: [`integrations/home-assistant/mock/`](integrations/home-assistant/mock/) (fake ESP32 stream for n8n, sample JSON + curl).
 
 ## Repository layout
 ```

@@ -1,0 +1,101 @@
+{
+  "name": "MOCK ESP32 OBD stream (test without the car)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 10
+            }
+          ]
+        }
+      },
+      "name": "Every 10 s",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "name": "Run once (manual)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simulated ESP32 OBD-II batch - same JSON format the real device POSTs.\n// A drive cycle: idle -> accelerate -> cruise -> brake, engine warming up over ~20 minutes.\nconst BATCH = 5, STEP = 2;               // 5 records, 2 s apart (like \"Save a sample every 2 s\")\nconst now = Math.floor(Date.now() / 1000);\nconst sd = $getWorkflowStaticData('global');\nif (!sd.start) sd.start = now;            // remembers when the \"engine\" started\nif (!sd.fuel) sd.fuel = 64;\nconst records = [];\nfor (let i = BATCH - 1; i >= 0; i--) {\n  const t = now - i * STEP, run = t - sd.start;\n  const phase = (run % 120) / 120;        // 2-minute drive cycle\n  let speed = phase < 0.1 ? 0 : phase < 0.35 ? (phase - 0.1) / 0.25 * 90 : phase < 0.8 ? 90 + 8 * Math.sin(run / 7) : Math.max(0, 90 - (phase - 0.8) / 0.2 * 90);\n  speed = Math.round(speed);\n  const rpm = speed === 0 ? 780 + Math.round(Math.random() * 40) : Math.round(1100 + speed * 22 + Math.random() * 120);\n  const throttle = speed === 0 ? 15.7 : +(16 + (phase < 0.35 ? 30 : 12) + Math.random() * 6).toFixed(1);\n  const coolant = Math.min(91, Math.round(40 + run / 15));          // warms up to 91 C\n  sd.fuel = Math.max(5, sd.fuel - 0.002);\n  records.push({ ts: t, boot: 7, uptime: 500 + run, mode: 'live', values: {\n    rpm, speed, coolant, throttle,\n    load: +(speed === 0 ? 21 : 30 + Math.random() * 25).toFixed(1),\n    intake: 31 + Math.round(run / 300),\n    voltage: +(14.0 + Math.random() * 0.2).toFixed(2),\n    fuel: +sd.fuel.toFixed(1),\n    oil: Math.min(98, Math.round(38 + run / 13)),\n  }});\n}\nreturn [{ json: { device: 'OBD-Monitor', type: 'log', records } }];\n"
+      },
+      "name": "Fake ESP32 batch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR-N8N/webhook/car-obd",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "name": "POST like the ESP32",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "Every 10 s": {
+      "main": [
+        [
+          {
+            "node": "Fake ESP32 batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run once (manual)": {
+      "main": [
+        [
+          {
+            "node": "Fake ESP32 batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fake ESP32 batch": {
+      "main": [
+        [
+          {
+            "node": "POST like the ESP32",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

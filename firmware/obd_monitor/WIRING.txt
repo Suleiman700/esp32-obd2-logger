@@ -48,6 +48,12 @@ POWER
   LM2596 OUT- -> ESP32 GND
   OBD pin 16 is not used. Never connect 12V directly to the ESP32.
 
+TROUBLESHOOTING
+  White screen ............ D19 and D23 touching, or CS/DC/RESET/SCK/SDI loose
+  Garbage when touched .... touch OFF in Settings -> Screen, SPI 10 MHz, short SCK/MOSI wires
+  Pages change by itself .. D13 noise/short: 10k D13->3V3 + 100nF D13->GND
+  Power spikes ............ 470-1000uF VIN-GND, 100uF 3V3-GND near the display
+
 ARDUINO IDE
   Board: ESP32 Dev Module, esp32 core 2.0.17, Partition: Default 4MB with spiffs
   Library: TFT_eSPI with the included User_Setup.h
