@@ -1,179 +1,266 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 800" width="1180" height="800" font-family="Segoe UI,Helvetica,Arial,sans-serif">
-<rect width="1180" height="800" fill="#ffffff"/>
-<text x="590" y="36" text-anchor="middle" font-size="22" font-weight="700" fill="#111">ESP32 OBD-II Monitor — wiring</text>
-<text x="590" y="58" text-anchor="middle" font-size="13" fill="#555">Connect by the pin LABEL printed on each board, not by position</text>
-<rect x="30" y="70" width="150" height="510" rx="10" fill="#374151" stroke="#333" stroke-width="1.5"/>
-<text x="105.0" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">OBD-II port</text>
-<text x="105.0" y="110" text-anchor="middle" font-size="11" fill="#e8e8e8">car socket pins</text>
-<circle cx="180" cy="140" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="171" y="144" text-anchor="end" font-size="12" fill="#fff">16  +12V</text>
-<circle cx="180" cy="190" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="171" y="194" text-anchor="end" font-size="12" fill="#fff">4  GND</text>
-<circle cx="180" cy="350" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="171" y="354" text-anchor="end" font-size="12" fill="#fff">6  CAN-H</text>
-<circle cx="180" cy="390" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="171" y="394" text-anchor="end" font-size="12" fill="#fff">14  CAN-L</text>
-<circle cx="180" cy="520" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="171" y="524" text-anchor="end" font-size="12" fill="#fff">5  Signal GND</text>
-<rect x="250" y="95" width="150" height="150" rx="10" fill="#1e3a8a" stroke="#333" stroke-width="1.5"/>
-<text x="325.0" y="117" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">LM2596</text>
-<text x="325.0" y="135" text-anchor="middle" font-size="11" fill="#e8e8e8">buck 12V → 5.0V</text>
-<circle cx="250" cy="140" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="259" y="144" font-size="12" fill="#fff">IN+</text>
-<circle cx="250" cy="190" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="259" y="194" font-size="12" fill="#fff">IN−</text>
-<circle cx="400" cy="160" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="391" y="164" text-anchor="end" font-size="12" fill="#fff">OUT+</text>
-<circle cx="400" cy="200" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="391" y="204" text-anchor="end" font-size="12" fill="#fff">OUT−</text>
-<rect x="250" y="250" width="150" height="180" rx="10" fill="#0f766e" stroke="#333" stroke-width="1.5"/>
-<text x="325.0" y="272" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">SN65HVD230</text>
-<text x="325.0" y="290" text-anchor="middle" font-size="11" fill="#e8e8e8">CAN transceiver</text>
-<circle cx="250" cy="350" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="259" y="354" font-size="12" fill="#fff">CANH</text>
-<circle cx="250" cy="390" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="259" y="394" font-size="12" fill="#fff">CANL</text>
-<circle cx="400" cy="310" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="391" y="314" text-anchor="end" font-size="12" fill="#fff">CTX</text>
-<circle cx="400" cy="330" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="391" y="334" text-anchor="end" font-size="12" fill="#fff">CRX</text>
-<circle cx="400" cy="380" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="391" y="384" text-anchor="end" font-size="12" fill="#fff">3V3</text>
-<circle cx="400" cy="410" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="391" y="414" text-anchor="end" font-size="12" fill="#fff">GND</text>
-<rect x="500" y="100" width="190" height="470" rx="10" fill="#111827" stroke="#333" stroke-width="1.5"/>
-<text x="595.0" y="122" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">ESP32 DevKit</text>
-<text x="595.0" y="140" text-anchor="middle" font-size="11" fill="#e8e8e8">30-pin</text>
-<circle cx="500" cy="160" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="509" y="164" font-size="12" fill="#fff">VIN</text>
-<circle cx="500" cy="200" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="509" y="204" font-size="12" fill="#fff">GND</text>
-<circle cx="500" cy="250" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="509" y="254" font-size="12" fill="#fff">3V3</text>
-<circle cx="500" cy="310" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="509" y="314" font-size="12" fill="#fff">D16 (RX2)</text>
-<circle cx="500" cy="330" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="509" y="334" font-size="12" fill="#fff">D5</text>
-<circle cx="690" cy="150" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="681" y="154" text-anchor="end" font-size="12" fill="#fff">3V3</text>
-<circle cx="690" cy="190" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="681" y="194" text-anchor="end" font-size="12" fill="#fff">GND</text>
-<circle cx="690" cy="250" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="681" y="254" text-anchor="end" font-size="12" fill="#fff">D15</text>
-<circle cx="690" cy="290" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="681" y="294" text-anchor="end" font-size="12" fill="#fff">D4</text>
-<circle cx="690" cy="330" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="681" y="334" text-anchor="end" font-size="12" fill="#fff">D2</text>
-<circle cx="690" cy="370" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="681" y="374" text-anchor="end" font-size="12" fill="#fff">D23</text>
-<circle cx="690" cy="410" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="681" y="414" text-anchor="end" font-size="12" fill="#fff">D18</text>
-<circle cx="690" cy="450" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="681" y="454" text-anchor="end" font-size="12" fill="#fff">D19</text>
-<circle cx="690" cy="490" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="681" y="494" text-anchor="end" font-size="12" fill="#fff">D22</text>
-<circle cx="550" cy="570" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="550" y="561" text-anchor="middle" font-size="12" fill="#fff">D13</text>
-<circle cx="640" cy="570" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="640" y="561" text-anchor="middle" font-size="12" fill="#fff">D25</text>
-<rect x="890" y="100" width="250" height="620" rx="10" fill="#b91c1c" stroke="#333" stroke-width="1.5"/>
-<text x="1015.0" y="122" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">2.4" ILI9341 TFT</text>
-<text x="1015.0" y="140" text-anchor="middle" font-size="11" fill="#e8e8e8">SPI display + touch, 14 pins</text>
-<circle cx="890" cy="150" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="899" y="154" font-size="12" fill="#fff">VCC</text>
-<circle cx="890" cy="190" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="899" y="194" font-size="12" fill="#fff">GND</text>
-<circle cx="890" cy="215" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="899" y="219" font-size="12" fill="#fff">LED</text>
-<circle cx="890" cy="250" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="899" y="254" font-size="12" fill="#fff">CS</text>
-<circle cx="890" cy="290" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="899" y="294" font-size="12" fill="#fff">RESET</text>
-<circle cx="890" cy="330" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="899" y="334" font-size="12" fill="#fff">DC</text>
-<circle cx="890" cy="370" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="899" y="374" font-size="12" fill="#fff">SDI (MOSI)</text>
-<circle cx="890" cy="410" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="899" y="414" font-size="12" fill="#fff">SCK</text>
-<circle cx="890" cy="450" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="899" y="454" font-size="12" fill="#fff">T_DO</text>
-<circle cx="890" cy="490" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="899" y="494" font-size="12" fill="#fff">T_CS</text>
-<circle cx="890" cy="540" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="899" y="544" font-size="12" fill="#fff">T_DIN</text>
-<circle cx="890" cy="580" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="899" y="584" font-size="12" fill="#fff">T_CLK</text>
-<circle cx="890" cy="630" r="4" fill="#bbb" stroke="#222" stroke-width="1.5"/>
-<text x="899" y="634" font-size="12" fill="#fff">SDO (MISO)</text>
-<circle cx="890" cy="675" r="4" fill="#bbb" stroke="#222" stroke-width="1.5"/>
-<text x="899" y="679" font-size="12" fill="#fff">T_IRQ</text>
-<rect x="470" y="660" width="140" height="80" rx="10" fill="#6d28d9" stroke="#333" stroke-width="1.5"/>
-<text x="540.0" y="682" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Push button</text>
-<text x="540.0" y="700" text-anchor="middle" font-size="11" fill="#e8e8e8">momentary</text>
-<circle cx="510" cy="660" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="510" y="651" text-anchor="middle" font-size="12" fill="#fff">leg 1</text>
-<circle cx="570" cy="660" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="570" y="651" text-anchor="middle" font-size="12" fill="#fff">leg 2</text>
-<rect x="640" y="660" width="170" height="80" rx="10" fill="#92400e" stroke="#333" stroke-width="1.5"/>
-<text x="725.0" y="682" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Buzzer</text>
-<text x="725.0" y="700" text-anchor="middle" font-size="11" fill="#e8e8e8">+ / − (or 3-pin module)</text>
-<circle cx="680" cy="660" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="680" y="651" text-anchor="middle" font-size="12" fill="#fff">+</text>
-<circle cx="770" cy="660" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
-<text x="770" y="651" text-anchor="middle" font-size="12" fill="#fff">−</text>
-<rect x="196" y="131" width="36" height="18" rx="4" fill="#fde68a" stroke="#92400e" stroke-width="1.5"/>
-<text x="214" y="144" font-size="11" fill="#7c2d12" text-anchor="middle">1A</text>
-<polyline points="180,140 196,140" fill="none" stroke="#d62828" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="232,140 250,140" fill="none" stroke="#d62828" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<text x="214" y="124" font-size="11" fill="#7c2d12" text-anchor="middle">fuse</text>
-<polyline points="180,190 250,190" fill="none" stroke="#222222" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="400,160 500,160" fill="none" stroke="#d62828" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<text x="450" y="153" font-size="11" fill="#b91c1c" text-anchor="middle">5.0 V</text>
-<polyline points="400,200 500,200" fill="none" stroke="#222222" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="180,350 250,350" fill="none" stroke="#e0b000" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="180,390 250,390" fill="none" stroke="#16a34a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="400,310 500,310" fill="none" stroke="#1d4ed8" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="400,330 500,330" fill="none" stroke="#0891b2" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="400,380 430,380 430,250 500,250" fill="none" stroke="#f77f00" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="430" cy="250" r="4.5" fill="#f77f00"/>
-<polyline points="400,410 450,410 450,200" fill="none" stroke="#222222" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="450" cy="200" r="4.5" fill="#222222"/>
-<polyline points="180,520 465,520 465,200" fill="none" stroke="#222222" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="7 5"/>
-<circle cx="465" cy="200" r="4.5" fill="#222222"/>
-<text x="300" y="512" font-size="11" fill="#333" text-anchor="middle">extra ground: OBD pin 5 → ESP32 GND</text>
-<polyline points="690,150 890,150" fill="none" stroke="#f77f00" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="860,150 860,215 890,215" fill="none" stroke="#f77f00" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="860" cy="150" r="4.5" fill="#f77f00"/>
-<polyline points="690,190 890,190" fill="none" stroke="#222222" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="690,250 890,250" fill="none" stroke="#0d9488" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="690,290 890,290" fill="none" stroke="#8b5a2b" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="690,330 890,330" fill="none" stroke="#db2777" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="690,370 890,370" fill="none" stroke="#1d4ed8" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="690,410 890,410" fill="none" stroke="#7c3aed" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="690,450 890,450" fill="none" stroke="#16a34a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="690,490 890,490" fill="none" stroke="#0369a1" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="890,540 800,540 800,370" fill="none" stroke="#1d4ed8" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="800" cy="370" r="4.5" fill="#1d4ed8"/>
-<polyline points="890,580 780,580 780,410" fill="none" stroke="#7c3aed" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="780" cy="410" r="4.5" fill="#7c3aed"/>
-<text x="990" y="544" font-size="11" fill="#fff" text-anchor="start">joined with SDI → D23</text>
-<text x="990" y="584" font-size="11" fill="#fff" text-anchor="start">joined with SCK → D18</text>
-<text x="990" y="634" font-size="11" fill="#fecaca" text-anchor="start">leave unconnected</text>
-<text x="990" y="679" font-size="11" fill="#fecaca" text-anchor="start">not used</text>
-<polyline points="550,570 550,620 510,620 510,660" fill="none" stroke="#7c3aed" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="640,570 640,620 680,620 680,660" fill="none" stroke="#c2410c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<polyline points="570,660 570,632" fill="none" stroke="#222222" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<rect x="550" y="612" width="40" height="20" rx="10" fill="#111"/>
-<text x="570" y="626" font-size="11" fill="#fff" text-anchor="middle">GND</text>
-<polyline points="770,660 770,632" fill="none" stroke="#222222" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<rect x="750" y="612" width="40" height="20" rx="10" fill="#111"/>
-<text x="770" y="626" font-size="11" fill="#fff" text-anchor="middle">GND</text>
-<rect x="30" y="610" width="410" height="170" rx="8" fill="#f9fafb" stroke="#d1d5db"/>
-<text x="42" y="632" font-size="14" fill="#111" text-anchor="start">Notes</text>
-<text x="42" y="656" font-size="12" fill="#333" text-anchor="start">• Set the LM2596 to 5.0 V BEFORE connecting the ESP32.</text>
-<text x="42" y="676" font-size="12" fill="#333" text-anchor="start">• Never connect OBD pin 16 (+12 V) straight to the ESP32.</text>
-<text x="42" y="696" font-size="12" fill="#333" text-anchor="start">• All GND symbols / black wires = the same ESP32 GND.</text>
-<text x="42" y="716" font-size="12" fill="#333" text-anchor="start">• SDO (MISO) left unconnected: it can block the touch chip.</text>
-<text x="42" y="736" font-size="12" fill="#333" text-anchor="start">• Button: internal pull-up, no resistor (4-leg: use diagonals).</text>
-<text x="42" y="756" font-size="12" fill="#333" text-anchor="start">• 3-pin buzzer module: VCC → 3V3, I/O → D25, GND → GND.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1580 1080" width="1580" height="1080" font-family="Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="1580" height="1080" fill="#ffffff"/>
+<text x="790" y="38" text-anchor="middle" font-size="24" font-weight="700" fill="#111">ESP32 OBD-II Monitor — full wiring (as installed)</text>
+<text x="790" y="62" text-anchor="middle" font-size="13" fill="#555">Connect by the pin LABEL printed on each board. Cat6 wires are drawn in their real colours; other wire colours are only for the drawing.</text>
+<rect x="20" y="78" width="250" height="560" rx="12" fill="#f3f4f6" stroke="#d1d5db"/>
+<text x="145" y="98" font-size="13" font-weight="700" fill="#374151" text-anchor="middle">IN THE CAR</text>
+<rect x="40" y="112" width="210" height="62" rx="10" fill="#7c2d12" stroke="#333" stroke-width="1.5"/>
+<text x="145.0" y="134" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Fuse box</text>
+<text x="145.0" y="152" text-anchor="middle" font-size="11" fill="#e8e8e8">switched 12V slot (ACC / ignition)</text>
+<circle cx="250" cy="150" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="241" y="154" text-anchor="end" font-size="12" fill="#fff"></text>
+<rect x="262" y="141" width="34" height="18" rx="4" fill="#fde68a" stroke="#92400e" stroke-width="1.5"/>
+<text x="279" y="154" font-size="11" font-weight="700" fill="#7c2d12" text-anchor="middle">3A</text>
+<polyline points="250,150 262,150" fill="none" stroke="#d62828" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="306" y="132" width="54" height="36" rx="6" fill="#111827" stroke="#333"/>
+<text x="333" y="154" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">SW</text>
+<text x="333" y="124" font-size="10" font-weight="400" fill="#555" text-anchor="middle">toggle</text>
+<text x="279" y="132" font-size="10" font-weight="400" fill="#7c2d12" text-anchor="middle">fuse</text>
+<polyline points="296,150 306,150" fill="none" stroke="#d62828" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="145" y="192" font-size="10" font-weight="400" fill="#555" text-anchor="middle">18 AWG wire → 3A fuse → switch</text>
+<rect x="40" y="215" width="210" height="400" rx="10" fill="#374151" stroke="#333" stroke-width="1.5"/>
+<text x="145.0" y="237" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">OBD-II port</text>
+<text x="145.0" y="255" text-anchor="middle" font-size="11" fill="#e8e8e8">car socket</text>
+<circle cx="250" cy="282" r="4" fill="#bbb" stroke="#222" stroke-width="1.5"/>
+<text x="241" y="286" text-anchor="end" font-size="12" fill="#fff">16  +12V (not used)</text>
+<circle cx="250" cy="300" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="241" y="304" text-anchor="end" font-size="12" fill="#fff">4  GND</text>
+<circle cx="250" cy="420" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="241" y="424" text-anchor="end" font-size="12" fill="#fff">6  CAN-H</text>
+<circle cx="250" cy="460" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="241" y="464" text-anchor="end" font-size="12" fill="#fff">14  CAN-L</text>
+<circle cx="250" cy="560" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="241" y="564" text-anchor="end" font-size="12" fill="#fff">5  Signal GND</text>
+<rect x="372" y="120" width="96" height="500" rx="10" fill="#fafafa" stroke="#cbd5e1" stroke-dasharray="5 4"/>
+<text x="420" y="612" font-size="12" font-weight="700" fill="#334155" text-anchor="middle">Cat6 cable</text>
+<polyline points="360,146 420,146 450,166 540,166" fill="none" stroke="#333" stroke-width="5.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="360,146 420,146 450,166 540,166" fill="none" stroke="#f28c28" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="360,154 420,154 450,174 540,174" fill="none" stroke="#9aa0a6" stroke-width="5.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="360,154 420,154 450,174 540,174" fill="none" stroke="#ffffff" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="360,154 420,154 450,174 540,174" fill="none" stroke="#f28c28" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="6 6"/>
+<polyline points="250,300 540,300" fill="none" stroke="#333" stroke-width="5.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="250,300 540,300" fill="none" stroke="#8b5a2b" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="250,420 540,420" fill="none" stroke="#333" stroke-width="5.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="250,420 540,420" fill="none" stroke="#2e9e44" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="250,460 540,460" fill="none" stroke="#9aa0a6" stroke-width="5.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="250,460 540,460" fill="none" stroke="#ffffff" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="250,460 540,460" fill="none" stroke="#2e9e44" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="6 6"/>
+<polyline points="250,560 540,560" fill="none" stroke="#9aa0a6" stroke-width="5.2" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="250,560 540,560" fill="none" stroke="#ffffff" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="250,560 540,560" fill="none" stroke="#8b5a2b" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="6 6"/>
+<text x="420" y="138" font-size="10" font-weight="400" fill="#9a3412" text-anchor="middle">orange + orange/white</text>
+<text x="420" y="292" font-size="10" font-weight="400" fill="#5b3a1e" text-anchor="middle">brown</text>
+<text x="420" y="412" font-size="10" font-weight="400" fill="#166534" text-anchor="middle">green</text>
+<text x="420" y="452" font-size="10" font-weight="400" fill="#166534" text-anchor="middle">green/white</text>
+<text x="420" y="552" font-size="10" font-weight="400" fill="#5b3a1e" text-anchor="middle">brown/white</text>
+<text x="420" y="592" font-size="10" font-weight="400" fill="#1d4ed8" text-anchor="middle">spare: blue, blue/white</text>
+<rect x="540" y="150" width="64" height="430" rx="8" fill="#4ade80" stroke="#166534" stroke-width="2"/>
+<text x="572" y="124" font-size="12" font-weight="700" fill="#166534" text-anchor="middle">Terminal block</text>
+<text x="572" y="140" font-size="10" font-weight="400" fill="#166534" text-anchor="middle">T1 = right-most screw</text>
+<rect x="548" y="159" width="48" height="22" rx="4" fill="#dcfce7" stroke="#166534"/>
+<text x="572" y="174" font-size="12" font-weight="700" fill="#14532d" text-anchor="middle">T1</text>
+<rect x="548" y="289" width="48" height="22" rx="4" fill="#dcfce7" stroke="#166534"/>
+<text x="572" y="304" font-size="12" font-weight="700" fill="#14532d" text-anchor="middle">T2</text>
+<rect x="548" y="409" width="48" height="22" rx="4" fill="#dcfce7" stroke="#166534"/>
+<text x="572" y="424" font-size="12" font-weight="700" fill="#14532d" text-anchor="middle">T3</text>
+<rect x="548" y="449" width="48" height="22" rx="4" fill="#dcfce7" stroke="#166534"/>
+<text x="572" y="464" font-size="12" font-weight="700" fill="#14532d" text-anchor="middle">T4</text>
+<rect x="548" y="489" width="48" height="22" rx="4" fill="#dcfce7" stroke="#166534"/>
+<text x="572" y="504" font-size="12" font-weight="700" fill="#14532d" text-anchor="middle">T5</text>
+<rect x="548" y="519" width="48" height="22" rx="4" fill="#dcfce7" stroke="#166534"/>
+<text x="572" y="534" font-size="12" font-weight="700" fill="#14532d" text-anchor="middle">T6</text>
+<rect x="548" y="549" width="48" height="22" rx="4" fill="#dcfce7" stroke="#166534"/>
+<text x="572" y="564" font-size="12" font-weight="700" fill="#14532d" text-anchor="middle">T7</text>
+<rect x="660" y="120" width="160" height="140" rx="10" fill="#1e3a8a" stroke="#333" stroke-width="1.5"/>
+<text x="740.0" y="142" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">LM2596</text>
+<text x="740.0" y="160" text-anchor="middle" font-size="11" fill="#e8e8e8">buck 12V → 5.0V</text>
+<circle cx="660" cy="170" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="669" y="174" font-size="12" fill="#fff">IN+</text>
+<circle cx="660" cy="210" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="669" y="214" font-size="12" fill="#fff">IN−</text>
+<circle cx="820" cy="170" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="811" y="174" text-anchor="end" font-size="12" fill="#fff">OUT+</text>
+<circle cx="820" cy="210" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="811" y="214" text-anchor="end" font-size="12" fill="#fff">OUT−</text>
+<polyline points="604,170 660,170" fill="none" stroke="#d62828" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="604,300 640,300 640,210 660,210" fill="none" stroke="#222222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="660" y="330" width="160" height="250" rx="10" fill="#0f766e" stroke="#333" stroke-width="1.5"/>
+<text x="740.0" y="352" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">SN65HVD230</text>
+<text x="740.0" y="370" text-anchor="middle" font-size="11" fill="#e8e8e8">CAN board</text>
+<circle cx="660" cy="420" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="669" y="424" font-size="12" fill="#fff">CANH</text>
+<circle cx="660" cy="460" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="669" y="464" font-size="12" fill="#fff">CANL</text>
+<circle cx="820" cy="370" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="811" y="374" text-anchor="end" font-size="12" fill="#fff">CTX</text>
+<circle cx="820" cy="395" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="811" y="399" text-anchor="end" font-size="12" fill="#fff">CRX</text>
+<circle cx="820" cy="520" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="811" y="524" text-anchor="end" font-size="12" fill="#fff">3V3</text>
+<circle cx="820" cy="550" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="811" y="554" text-anchor="end" font-size="12" fill="#fff">GND</text>
+<polyline points="604,420 660,420" fill="none" stroke="#ca8a04" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="604,460 660,460" fill="none" stroke="#16a34a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="940" y="120" width="190" height="500" rx="10" fill="#111827" stroke="#333" stroke-width="1.5"/>
+<text x="1035.0" y="142" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">ESP32 DevKit</text>
+<text x="1035.0" y="160" text-anchor="middle" font-size="11" fill="#e8e8e8">30-pin</text>
+<circle cx="940" cy="170" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="949" y="174" font-size="12" fill="#fff">VIN</text>
+<circle cx="940" cy="210" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="949" y="214" font-size="12" fill="#fff">GND</text>
+<circle cx="940" cy="260" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="949" y="264" font-size="12" fill="#fff">3V3</text>
+<circle cx="940" cy="370" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="949" y="374" font-size="12" fill="#fff">D16 (RX2)</text>
+<circle cx="940" cy="395" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="949" y="399" font-size="12" fill="#fff">D5</text>
+<circle cx="1130" cy="160" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1121" y="164" text-anchor="end" font-size="12" fill="#fff">3V3</text>
+<circle cx="1130" cy="200" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1121" y="204" text-anchor="end" font-size="12" fill="#fff">GND</text>
+<circle cx="1130" cy="260" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1121" y="264" text-anchor="end" font-size="12" fill="#fff">D15</text>
+<circle cx="1130" cy="300" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1121" y="304" text-anchor="end" font-size="12" fill="#fff">D4</text>
+<circle cx="1130" cy="340" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1121" y="344" text-anchor="end" font-size="12" fill="#fff">D2</text>
+<circle cx="1130" cy="380" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1121" y="384" text-anchor="end" font-size="12" fill="#fff">D23</text>
+<circle cx="1130" cy="420" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1121" y="424" text-anchor="end" font-size="12" fill="#fff">D18</text>
+<circle cx="1130" cy="460" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1121" y="464" text-anchor="end" font-size="12" fill="#fff">D19</text>
+<circle cx="1130" cy="500" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1121" y="504" text-anchor="end" font-size="12" fill="#fff">D22</text>
+<circle cx="990" cy="620" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="990" y="611" text-anchor="middle" font-size="12" fill="#fff">D13</text>
+<circle cx="1080" cy="620" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1080" y="611" text-anchor="middle" font-size="12" fill="#fff">D25</text>
+<polyline points="820,170 940,170" fill="none" stroke="#d62828" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="880" y="163" font-size="11" font-weight="400" fill="#b91c1c" text-anchor="middle">5.0 V</text>
+<polyline points="820,210 940,210" fill="none" stroke="#222222" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="820,370 940,370" fill="none" stroke="#2563eb" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="820,395 940,395" fill="none" stroke="#0891b2" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="820,520 880,520 880,260 940,260" fill="none" stroke="#f77f00" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="880" cy="260" r="4.5" fill="#f77f00"/>
+<polyline points="820,550 900,550 900,210" fill="none" stroke="#222222" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="900" cy="210" r="4.5" fill="#222222"/>
+<polyline points="604,560 624,560 624,600 920,600 920,210" fill="none" stroke="#222222" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="7 5"/>
+<circle cx="920" cy="210" r="4.5" fill="#222222"/>
+<text x="770" y="615" font-size="10" font-weight="400" fill="#333" text-anchor="middle">T7 → ESP32 GND (signal ground)</text>
+<rect x="1300" y="110" width="260" height="640" rx="10" fill="#b91c1c" stroke="#333" stroke-width="1.5"/>
+<text x="1430.0" y="132" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">2.4" ILI9341 TFT</text>
+<text x="1430.0" y="150" text-anchor="middle" font-size="11" fill="#e8e8e8">SPI display + touch, 14 pins</text>
+<circle cx="1300" cy="150" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1309" y="154" font-size="12" fill="#fff">1 VCC</text>
+<circle cx="1300" cy="200" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1309" y="204" font-size="12" fill="#fff">2 GND</text>
+<circle cx="1300" cy="230" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1309" y="234" font-size="12" fill="#fff">8 LED</text>
+<circle cx="1300" cy="260" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1309" y="264" font-size="12" fill="#fff">3 CS</text>
+<circle cx="1300" cy="300" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1309" y="304" font-size="12" fill="#fff">4 RESET</text>
+<circle cx="1300" cy="340" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1309" y="344" font-size="12" fill="#fff">5 DC</text>
+<circle cx="1300" cy="380" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1309" y="384" font-size="12" fill="#fff">6 SDI (MOSI)</text>
+<circle cx="1300" cy="420" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1309" y="424" font-size="12" fill="#fff">7 SCK</text>
+<circle cx="1300" cy="460" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1309" y="464" font-size="12" fill="#fff">13 T_DO</text>
+<circle cx="1300" cy="500" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1309" y="504" font-size="12" fill="#fff">11 T_CS</text>
+<circle cx="1300" cy="560" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1309" y="564" font-size="12" fill="#fff">12 T_DIN</text>
+<circle cx="1300" cy="600" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1309" y="604" font-size="12" fill="#fff">10 T_CLK</text>
+<circle cx="1300" cy="650" r="4" fill="#bbb" stroke="#222" stroke-width="1.5"/>
+<text x="1309" y="654" font-size="12" fill="#fff">9 SDO (MISO)</text>
+<circle cx="1300" cy="695" r="4" fill="#bbb" stroke="#222" stroke-width="1.5"/>
+<text x="1309" y="699" font-size="12" fill="#fff">14 T_IRQ</text>
+<polyline points="1130,160 1250,160 1250,150 1300,150" fill="none" stroke="#f77f00" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1270,155 1270,230 1300,230" fill="none" stroke="#f77f00" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1270" cy="155" r="4.5" fill="#f77f00"/>
+<polyline points="1130,200 1300,200" fill="none" stroke="#222222" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1130,260 1300,260" fill="none" stroke="#0d9488" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1130,300 1300,300" fill="none" stroke="#8b5a2b" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1130,340 1300,340" fill="none" stroke="#db2777" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1130,380 1300,380" fill="none" stroke="#2563eb" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1130,420 1300,420" fill="none" stroke="#7c3aed" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1130,460 1300,460" fill="none" stroke="#2e9e44" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1130,500 1300,500" fill="none" stroke="#0369a1" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1300,560 1210,560 1210,380" fill="none" stroke="#2563eb" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1210" cy="380" r="4.5" fill="#2563eb"/>
+<polyline points="1300,600 1190,600 1190,420" fill="none" stroke="#7c3aed" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1190" cy="420" r="4.5" fill="#7c3aed"/>
+<text x="1440" y="564" font-size="11" font-weight="400" fill="#fff" text-anchor="start">joined with SDI → D23</text>
+<text x="1440" y="604" font-size="11" font-weight="400" fill="#fff" text-anchor="start">joined with SCK → D18</text>
+<text x="1440" y="654" font-size="11" font-weight="400" fill="#fecaca" text-anchor="start">leave empty</text>
+<text x="1440" y="699" font-size="11" font-weight="400" fill="#fecaca" text-anchor="start">leave empty</text>
+<rect x="890" y="700" width="150" height="74" rx="10" fill="#6d28d9" stroke="#333" stroke-width="1.5"/>
+<text x="965.0" y="722" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Push button</text>
+<text x="965.0" y="740" text-anchor="middle" font-size="11" fill="#e8e8e8">momentary</text>
+<circle cx="930" cy="700" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="930" y="691" text-anchor="middle" font-size="12" fill="#fff"></text>
+<circle cx="1010" cy="700" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1010" y="691" text-anchor="middle" font-size="12" fill="#fff"></text>
+<rect x="1070" y="700" width="170" height="74" rx="10" fill="#92400e" stroke="#333" stroke-width="1.5"/>
+<text x="1155.0" y="722" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Buzzer</text>
+<text x="1155.0" y="740" text-anchor="middle" font-size="11" fill="#e8e8e8">+ / − (or 3-pin module)</text>
+<circle cx="1110" cy="700" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1110" y="691" text-anchor="middle" font-size="12" fill="#fff">+</text>
+<circle cx="1200" cy="700" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="1200" y="691" text-anchor="middle" font-size="12" fill="#fff">−</text>
+<polyline points="990,620 990,650 930,650 930,700" fill="none" stroke="#7c3aed" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1080,620 1080,650 1110,650 1110,700" fill="none" stroke="#c2410c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="1010,700 1010,686" fill="none" stroke="#222222" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="990.0" y="666" width="40" height="20" rx="10" fill="#111"/>
+<text x="1010" y="680" font-size="11" font-weight="400" fill="#fff" text-anchor="middle">GND</text>
+<polyline points="1200,700 1200,686" fill="none" stroke="#222222" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<rect x="1180.0" y="666" width="40" height="20" rx="10" fill="#111"/>
+<text x="1200" y="680" font-size="11" font-weight="400" fill="#fff" text-anchor="middle">GND</text>
+<rect x="20" y="812" width="760" height="250" rx="10" fill="#f0fdf4" stroke="#86efac"/>
+<text x="36" y="838" font-size="14" font-weight="700" fill="#14532d" text-anchor="start">Terminal block (green, 7 screws) — T1 is the RIGHT-most screw</text>
+<text x="40" y="864" font-size="12" font-weight="700" fill="#14532d" text-anchor="start">T1</text>
+<text x="100" y="864" font-size="12" font-weight="400" fill="#111" text-anchor="start">orange + orange/white</text>
+<text x="270" y="864" font-size="12" font-weight="400" fill="#333" text-anchor="start">switched +12V (after 3A fuse + switch)</text>
+<text x="570" y="864" font-size="12" font-weight="700" fill="#111" text-anchor="start">LM2596 IN+</text>
+<text x="40" y="888" font-size="12" font-weight="700" fill="#14532d" text-anchor="start">T2</text>
+<text x="100" y="888" font-size="12" font-weight="400" fill="#111" text-anchor="start">brown</text>
+<text x="270" y="888" font-size="12" font-weight="400" fill="#333" text-anchor="start">OBD pin 4 — chassis GND</text>
+<text x="570" y="888" font-size="12" font-weight="700" fill="#111" text-anchor="start">LM2596 IN−</text>
+<text x="40" y="912" font-size="12" font-weight="700" fill="#14532d" text-anchor="start">T3</text>
+<text x="100" y="912" font-size="12" font-weight="400" fill="#111" text-anchor="start">green</text>
+<text x="270" y="912" font-size="12" font-weight="400" fill="#333" text-anchor="start">OBD pin 6 — CAN-H</text>
+<text x="570" y="912" font-size="12" font-weight="700" fill="#111" text-anchor="start">CAN board CANH</text>
+<text x="40" y="936" font-size="12" font-weight="700" fill="#14532d" text-anchor="start">T4</text>
+<text x="100" y="936" font-size="12" font-weight="400" fill="#111" text-anchor="start">green/white</text>
+<text x="270" y="936" font-size="12" font-weight="400" fill="#333" text-anchor="start">OBD pin 14 — CAN-L</text>
+<text x="570" y="936" font-size="12" font-weight="700" fill="#111" text-anchor="start">CAN board CANL</text>
+<text x="40" y="960" font-size="12" font-weight="700" fill="#14532d" text-anchor="start">T5</text>
+<text x="100" y="960" font-size="12" font-weight="400" fill="#111" text-anchor="start">—</text>
+<text x="270" y="960" font-size="12" font-weight="400" fill="#333" text-anchor="start">empty</text>
+<text x="570" y="960" font-size="12" font-weight="700" fill="#111" text-anchor="start"></text>
+<text x="40" y="984" font-size="12" font-weight="700" fill="#14532d" text-anchor="start">T6</text>
+<text x="100" y="984" font-size="12" font-weight="400" fill="#111" text-anchor="start">—</text>
+<text x="270" y="984" font-size="12" font-weight="400" fill="#333" text-anchor="start">empty</text>
+<text x="570" y="984" font-size="12" font-weight="700" fill="#111" text-anchor="start"></text>
+<text x="40" y="1008" font-size="12" font-weight="700" fill="#14532d" text-anchor="start">T7</text>
+<text x="100" y="1008" font-size="12" font-weight="400" fill="#111" text-anchor="start">brown/white</text>
+<text x="270" y="1008" font-size="12" font-weight="400" fill="#333" text-anchor="start">OBD pin 5 — signal GND</text>
+<text x="570" y="1008" font-size="12" font-weight="700" fill="#111" text-anchor="start">ESP32 GND</text>
+<text x="40" y="1032" font-size="12" font-weight="700" fill="#14532d" text-anchor="start">spare</text>
+<text x="100" y="1032" font-size="12" font-weight="400" fill="#111" text-anchor="start">blue, blue/white</text>
+<text x="270" y="1032" font-size="12" font-weight="400" fill="#333" text-anchor="start">not connected</text>
+<text x="570" y="1032" font-size="12" font-weight="700" fill="#111" text-anchor="start"></text>
+<rect x="800" y="812" width="760" height="250" rx="10" fill="#f9fafb" stroke="#d1d5db"/>
+<text x="816" y="838" font-size="14" font-weight="700" fill="#111" text-anchor="start">Notes</text>
+<text x="816" y="864" font-size="12" font-weight="400" fill="#333" text-anchor="start">• 12V: fuse box (switched) → 18 AWG → 3A fuse → toggle switch → Cat6 orange pair. Fuse FIRST, next to the tap.</text>
+<text x="816" y="890" font-size="12" font-weight="400" fill="#333" text-anchor="start">• Set the LM2596 to 5.0–5.2 V (no load) BEFORE connecting the ESP32.</text>
+<text x="816" y="916" font-size="12" font-weight="400" fill="#333" text-anchor="start">• Shared strips: 3V3 (VCC, LED, CAN 3V3) · GND · D18 (SCK+T_CLK) · D23 (SDI+T_DIN).</text>
+<text x="816" y="942" font-size="12" font-weight="400" fill="#333" text-anchor="start">• D19 = T_DO only. D19 and D23 must never touch (white screen + fake touches).</text>
+<text x="816" y="968" font-size="12" font-weight="400" fill="#333" text-anchor="start">• Display SDO (MISO) and T_IRQ stay empty. Touch calibrate: web panel → Settings.</text>
+<text x="816" y="994" font-size="12" font-weight="400" fill="#333" text-anchor="start">• Button: internal pull-up, no resistor. Buzzer 3-pin: VCC→3V3, I/O→D25, GND→GND.</text>
+<text x="816" y="1020" font-size="12" font-weight="400" fill="#333" text-anchor="start">• OBD pin 16 is not used. Check pigtail colours against OBD pins with a meter.</text>
 </svg>

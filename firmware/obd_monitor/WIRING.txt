@@ -1,4 +1,4 @@
-OBD MONITOR v3.0 (landscape) - FINAL WIRING
+OBD MONITOR v3.2 (landscape) - FINAL WIRING (as installed)
 ===============================
 Solder by the LABEL printed next to each pin, not by position.
 
@@ -20,16 +20,33 @@ PUSH BUTTON   one leg -> D13, other leg -> GND  (4-leg button: use diagonal legs
 BUZZER        + -> D25, - -> GND   (3-pin module: VCC 3.3V, I/O D25, GND)
 
 CAN BOARD (SN65HVD230)
-  3.3V -> 3.3V   GND -> GND   TX -> D16 (may be labelled RX2)   RX -> D5
-  CANH -> OBD pin 6    CANL -> OBD pin 14
-EXTRA GROUND   ESP32 GND -> OBD pin 5
+  3.3V -> 3.3V   GND -> GND   TX/CTX -> D16 (labelled RX2, NOT TX2)   RX/CRX -> D5
+  CANH -> terminal T3 (Cat6 green)       -> OBD pin 6
+  CANL -> terminal T4 (Cat6 green/white) -> OBD pin 14
 
-POWER IN THE CAR (LM2596 buck)
-  OBD pin 16 (+12V) -> 1A fuse -> buck IN+
-  OBD pin 4 (GND) ----------------> buck IN-
-  buck OUT+ (SET TO 5.0V FIRST, nothing connected) -> ESP32 VIN
-  buck OUT- -> ESP32 GND
-  Never connect pin 16 directly to the ESP32.
+SHARED STRIPS (PCB)
+  3V3 : display VCC, display LED, CAN 3V3 (+ buzzer VCC if 3-pin)
+  GND : display GND, CAN GND, button leg 2, buzzer -, buck OUT-, T7 (OBD pin 5)
+  D18 : display SCK + T_CLK
+  D23 : display SDI + T_DIN
+  D19 : T_DO ONLY - D19 and D23 must never touch
+
+CAR CONNECTION - Cat6 cable + green 7-screw terminal block (T1 = RIGHT-most screw)
+  T1  orange + orange/white  switched +12V (fuse box -> 3A fuse -> toggle switch)  -> LM2596 IN+
+  T2  brown                  OBD pin 4 (chassis GND)                              -> LM2596 IN-
+  T3  green                  OBD pin 6 (CAN-H)                                    -> CAN board CANH
+  T4  green/white            OBD pin 14 (CAN-L)                                   -> CAN board CANL
+  T5  -                      empty
+  T6  -                      empty
+  T7  brown/white            OBD pin 5 (signal GND)                               -> ESP32 GND
+  spare: blue, blue/white (not connected)
+
+POWER
+  Fuse box switched slot -> 18 AWG -> 3A fuse -> toggle switch -> Cat6 orange pair -> T1 -> LM2596 IN+
+  OBD pin 4 -> Cat6 brown -> T2 -> LM2596 IN-
+  LM2596 OUT+ (set 5.0-5.2V with no load FIRST) -> ESP32 VIN
+  LM2596 OUT- -> ESP32 GND
+  OBD pin 16 is not used. Never connect 12V directly to the ESP32.
 
 ARDUINO IDE
   Board: ESP32 Dev Module, esp32 core 2.0.17, Partition: Default 4MB with spiffs

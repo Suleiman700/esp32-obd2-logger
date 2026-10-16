@@ -99,6 +99,8 @@ The hotspot stays on while the monitor is also connected to your internet WiFi (
 
 ![Wiring diagram](docs/wiring.svg)
 
+[PNG version](docs/wiring.png)
+
 > Connect by the **label printed next to each pin**, not by its position.
 
 | From | Pin | To | Notes |
@@ -117,19 +119,49 @@ The hotspot stays on while the monitor is also connected to your internet WiFi (
 | | T_IRQ | — | not used |
 | **CAN board** (SN65HVD230) | 3V3 | ESP32 3V3 | |
 | | GND | ESP32 GND | |
-| | CTX / TX | D16 (often labelled RX2) | |
+| | CTX / TX | D16 (labelled RX2) | not TX2 (GPIO17) |
 | | CRX / RX | D5 | |
-| | CANH | OBD pin 6 | |
-| | CANL | OBD pin 14 | |
+| | CANH | terminal **T3** → OBD pin 6 | see car connection below |
+| | CANL | terminal **T4** → OBD pin 14 | |
 | **Push button** | leg 1 | D13 | internal pull-up, no resistor (4-leg button: use diagonal legs) |
 | | leg 2 | GND | |
 | **Buzzer** | + | D25 | 3-pin module: VCC → 3V3, I/O → D25, GND → GND |
 | | − | GND | |
-| **Power** | OBD pin 16 (+12 V) | 1 A fuse → LM2596 IN+ | never straight to the ESP32 |
-| | OBD pin 4 (chassis GND) | LM2596 IN− | |
-| | LM2596 OUT+ (5.0 V) | ESP32 VIN | |
+| **Power** | switched +12 V (fuse box) | 3 A fuse → toggle switch → terminal **T1** → LM2596 IN+ | never straight to the ESP32 |
+| | OBD pin 4 (chassis GND) | terminal **T2** → LM2596 IN− | |
+| | LM2596 OUT+ (5.0–5.2 V) | ESP32 VIN | set the voltage before connecting |
 | | LM2596 OUT− | ESP32 GND | |
-| **Extra ground** | OBD pin 5 (signal GND) | ESP32 GND | |
+| **Extra ground** | OBD pin 5 (signal GND) | terminal **T7** → ESP32 GND | |
+
+### Shared connections (one strip each on the PCB)
+
+| Strip | ESP32 pin | Connect to this strip |
+|---|---|---|
+| **3V3** | 3V3 | Display VCC · Display LED · CAN 3V3 · Buzzer VCC (3-pin only) |
+| **GND** | GND | Display GND · CAN GND · Button leg 2 · Buzzer − · Buck OUT− · OBD pin 5 (T7) |
+| **SCK** | D18 | Display SCK · Display T_CLK |
+| **MOSI** | D23 | Display SDI (MOSI) · Display T_DIN |
+
+D19 has **only T_DO**. D19 and D23 must never touch (white screen + fake touches).
+
+### Car connection: Cat6 cable + terminal block
+
+One Cat6 cable runs from the car to a green 7-screw terminal block on the case. **T1 is the right-most screw.**
+
+| Screw | Cat6 wire | From (car side) | To (inside the box) |
+|---|---|---|---|
+| **T1** | orange + orange/white (doubled) | switched +12 V → 3 A fuse → toggle switch | LM2596 IN+ |
+| **T2** | brown | OBD pin 4 — chassis GND | LM2596 IN− |
+| **T3** | green | OBD pin 6 — CAN-H | CAN board CANH |
+| **T4** | green/white | OBD pin 14 — CAN-L | CAN board CANL |
+| T5 | — | empty | |
+| T6 | — | empty | |
+| **T7** | brown/white | OBD pin 5 — signal GND | ESP32 GND |
+| spare | blue, blue/white | not connected | |
+
+- 12 V path: **fuse box (switched slot) → 18 AWG → 3 A fuse → toggle switch → Cat6 orange pair**. The fuse goes first, right at the tap. Only the +12 V wire is fused.
+- OBD pin 16 (always-on +12 V) is not used, so the monitor turns off with the car.
+- CAN-H / CAN-L stay on the **same twisted pair** (green). OBD pigtail colours vary — check them against the OBD pins with a meter.
 
 Pins are also set in [`firmware/obd_monitor/config.h`](firmware/obd_monitor/config.h) (CAN, button, buzzer) and [`firmware/tft_espi_setup/User_Setup.h`](firmware/tft_espi_setup/User_Setup.h) (display).
 
