@@ -1,0 +1,168 @@
+{
+  "name": "Car OBD → Home Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "car-obd",
+        "options": {}
+      },
+      "name": "OBD data webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "car-obd"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Turn the ESP32 batch into one Home Assistant sensor update per value.\n// Only the NEWEST live record is used (older backlog records are skipped for HA).\nconst body = $input.first().json.body || $input.first().json;\nconst recs = (body.records || []).filter(r => r && r.values);\nif (!recs.length) return [];\n\nconst live = recs.filter(r => r.mode !== 'demo');\nconst pick = (list) => list.reduce((a, b) => ((b.ts || 0) >= (a.ts || 0) ? b : a), list[0]);\nconst latest = pick(recs);\n\n// key: [name, unit, device_class, icon]\nconst META = {\n  rpm:          ['Engine RPM', 'rpm', null, 'mdi:engine'],\n  speed:        ['Speed', 'km/h', 'speed', 'mdi:speedometer'],\n  coolant:      ['Coolant Temp', '°C', 'temperature', 'mdi:coolant-temperature'],\n  oil:          ['Oil Temp', '°C', 'temperature', 'mdi:oil-temperature'],\n  intake:       ['Intake Temp', '°C', 'temperature', 'mdi:thermometer'],\n  ambient:      ['Ambient Temp', '°C', 'temperature', 'mdi:thermometer'],\n  voltage:      ['Battery Voltage', 'V', 'voltage', 'mdi:car-battery'],\n  load:         ['Engine Load', '%', null, 'mdi:engine-outline'],\n  throttle:     ['Throttle', '%', null, 'mdi:pedestrian'],\n  rel_throttle: ['Rel. Throttle', '%', null, 'mdi:pedestrian'],\n  pedal:        ['Accel Pedal', '%', null, 'mdi:car-brake-alert'],\n  fuel:         ['Fuel Level', '%', null, 'mdi:gas-station'],\n  fuel_rate:    ['Fuel Rate', 'L/h', null, 'mdi:fuel'],\n  maf:          ['MAF Rate', 'g/s', null, 'mdi:air-filter'],\n  map:          ['Intake MAP', 'kPa', 'pressure', 'mdi:gauge'],\n  baro:         ['Baro Pressure', 'kPa', 'pressure', 'mdi:gauge'],\n  fuel_press:   ['Fuel Pressure', 'kPa', 'pressure', 'mdi:gauge'],\n  timing:       ['Timing Advance', '°', null, 'mdi:timer-cog-outline'],\n  stft1:        ['Short Fuel Trim', '%', null, 'mdi:tune'],\n  ltft1:        ['Long Fuel Trim', '%', null, 'mdi:tune'],\n  runtime:      ['Run Time', 's', 'duration', 'mdi:timer-outline'],\n  dist_mil:     ['Dist. with MIL', 'km', 'distance', 'mdi:map-marker-distance'],\n  dist_clr:     ['Dist. since clear', 'km', 'distance', 'mdi:map-marker-distance'],\n};\n\nconst items = [];\nif (live.length) {\n  const last = pick(live);\n  for (const [k, v] of Object.entries(last.values)) {\n    const m = META[k] || [k, null, null, 'mdi:car'];\n    const attributes = { friendly_name: 'Car ' + m[0], icon: m[3], state_class: 'measurement' };\n    if (m[1]) attributes.unit_of_measurement = m[1];\n    if (m[2]) attributes.device_class = m[2];\n    items.push({ json: { entity: 'sensor.car_' + k, state: Math.round(v * 100) / 100, attributes } });\n  }\n  items.push({ json: { entity: 'sensor.car_last_update',\n    state: new Date(last.ts ? last.ts * 1000 : Date.now()).toISOString(),\n    attributes: { friendly_name: 'Car last update', device_class: 'timestamp', icon: 'mdi:clock-outline' } } });\n}\nitems.push({ json: { entity: 'sensor.car_obd_mode', state: latest.mode || 'unknown',\n  attributes: { friendly_name: 'Car OBD mode', icon: 'mdi:car-connected', records_in_batch: recs.length } } });\nreturn items;\n"
+      },
+      "name": "Latest values → sensors",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'http://homeassistant.local:8123/api/states/' + $json.entity }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer PASTE_YOUR_LONG_LIVED_TOKEN_HERE"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ state: $json.state, attributes: $json.attributes }) }}",
+        "options": {}
+      },
+      "name": "Update HA sensor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "car-alert",
+        "options": {}
+      },
+      "name": "OBD alert webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        260
+      ],
+      "webhookId": "car-alert"
+    },
+    {
+      "parameters": {
+        "jsCode": "// One Home Assistant notification per alert event from the ESP32.\nconst body = $input.first().json.body || $input.first().json;\nreturn (body.records || []).map(a => {\n  const val = (a.value !== undefined && a.value !== null) ? Number(a.value).toFixed(1) : '?';\n  const title = a.event === 'triggered' ? '🚗⚠️ Car alert: ' + a.name : '🚗✅ Car alert cleared: ' + a.name;\n  const message = a.name + ' = ' + val + ' ' + (a.unit || '') + '  (rule: ' + a.condition + ' ' + a.threshold + ')' + (a.mode === 'demo' ? '  [DEMO data]' : '');\n  return { json: { title, message, notification_id: 'car_alert_' + (a.key || a.pid) } };\n});\n"
+      },
+      "name": "Alert → message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://homeassistant.local:8123/api/services/persistent_notification/create",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer PASTE_YOUR_LONG_LIVED_TOKEN_HERE"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: $json.title, message: $json.message, notification_id: $json.notification_id }) }}",
+        "options": {}
+      },
+      "name": "HA notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        260
+      ]
+    }
+  ],
+  "connections": {
+    "OBD data webhook": {
+      "main": [
+        [
+          {
+            "node": "Latest values → sensors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Latest values → sensors": {
+      "main": [
+        [
+          {
+            "node": "Update HA sensor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OBD alert webhook": {
+      "main": [
+        [
+          {
+            "node": "Alert → message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alert → message": {
+      "main": [
+        [
+          {
+            "node": "HA notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

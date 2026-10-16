@@ -264,6 +264,9 @@ Alerts URL (when a rule triggers and when it clears):
 ```
 Your endpoint must answer HTTP 2xx, otherwise the data is kept and sent again. For **n8n**, use a *Webhook* node with method **POST** and the **production** URL (`/webhook/…`, not `/webhook-test/…`).
 
+## Home Assistant
+Car data → n8n → Home Assistant sensors + dashboard + alert notifications: see [`integrations/home-assistant/`](integrations/home-assistant/) (importable n8n workflow + dashboard card).
+
 ## Repository layout
 ```
 firmware/obd_monitor/        Arduino sketch + WIRING.txt + README.txt

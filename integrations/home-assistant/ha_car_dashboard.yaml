@@ -1,0 +1,49 @@
+# Home Assistant dashboard for the ESP32 OBD-II Monitor
+# Dashboard -> Edit -> Add card -> Manual -> paste everything below
+type: vertical-stack
+cards:
+  - type: horizontal-stack
+    cards:
+      - type: gauge
+        entity: sensor.car_coolant
+        name: Coolant
+        min: 40
+        max: 120
+        severity: {green: 40, yellow: 100, red: 105}
+      - type: gauge
+        entity: sensor.car_rpm
+        name: RPM
+        min: 0
+        max: 6000
+        severity: {green: 0, yellow: 4000, red: 5500}
+      - type: gauge
+        entity: sensor.car_speed
+        name: Speed
+        min: 0
+        max: 180
+  - type: glance
+    columns: 4
+    entities:
+      - entity: sensor.car_voltage
+        name: Battery
+      - entity: sensor.car_fuel
+        name: Fuel
+      - entity: sensor.car_load
+        name: Load
+      - entity: sensor.car_obd_mode
+        name: Mode
+  - type: entities
+    title: Car
+    entities:
+      - entity: sensor.car_last_update
+        name: Last update
+      - sensor.car_throttle
+      - sensor.car_intake
+      - sensor.car_oil
+      - sensor.car_ambient
+  - type: history-graph
+    title: Last 24 hours
+    hours_to_show: 24
+    entities:
+      - entity: sensor.car_coolant
+      - entity: sensor.car_voltage
