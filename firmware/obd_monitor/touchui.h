@@ -28,9 +28,12 @@ uint8_t keyCount = 0;
 
 // ---------------- touch calibration (3 taps) ----------------
 void drawCross(int x, int y, uint16_t c) {
-  tft.drawLine(x - 12, y, x + 12, y, c);
-  tft.drawLine(x, y - 12, x, y + 12, c);
-  tft.drawCircle(x, y, 6, c);
+  for (int d = -1; d <= 1; d++) {                       // thick cross
+    tft.drawLine(x - 18, y + d, x + 18, y + d, c);
+    tft.drawLine(x + d, y - 18, x + d, y + 18, c);
+  }
+  tft.drawCircle(x, y, 10, c);
+  tft.drawCircle(x, y, 11, c);
 }
 
 // Show a cross, wait for a firm tap on it, return the averaged raw position.
@@ -41,9 +44,17 @@ int waitTap(int px, int py, uint16_t& rx, uint16_t& ry, uint32_t timeoutMs) {
   while (touchRaw(x, y, z) && millis() - t0 < 3000) delay(10);      // finger up first
   drawCross(px, py, C_ACCENT);
   t0 = millis();
+  uint32_t lastLog = 0, btnSince = 0;
   while (!touchRaw(x, y, z)) {
     if (millis() - t0 > timeoutMs) { drawCross(px, py, C_BG); return 1; }
-    if (digitalRead(BUTTON_PIN) == LOW && millis() - t0 > 500) { drawCross(px, py, C_BG); return 2; }
+    if (digitalRead(BUTTON_PIN) == LOW) {                              // cancel: hold the button 0.3 s
+      if (!btnSince) btnSince = millis();
+      if (millis() - btnSince > 300 && millis() - t0 > 500) { drawCross(px, py, C_BG); return 2; }
+    } else btnSince = 0;
+    if (millis() - lastLog > 1000) {
+      lastLog = millis();
+      Serial.printf("  waiting for press on cross at %d,%d (pressure z=%u, needs >%d)\n", px, py, lastRawZ, TOUCH_Z_MIN);
+    }
     delay(10);
   }
   uint32_t sx = 0, sy = 0, n = 0;
@@ -67,12 +78,13 @@ void runTouchCalibration() {
   tft.setTextColor(C_TEXT, C_BG);
   tft.setTextDatum(MC_DATUM);
   tft.drawString("Touch calibration", SW / 2, 95, 4);
-  tft.drawString("Press each cross firmly (3 crosses)", SW / 2, 130, 2);
+  delay(10);
+  tft.drawString("Press the centre of each cross firmly", SW / 2, 130, 2);
   tft.setTextColor(C_LABEL, C_BG);
   tft.drawString("push button = cancel", SW / 2, 152, 2);
   Serial.printf("Touch calibration started (raw Z now %u)\n", tft.getTouchRawZ());
 
-  const int px[3] = {20, SW - 20, 20}, py[3] = {20, 20, SH - 20};
+  const int px[3] = {CAL_INSET, SW - CAL_INSET, CAL_INSET}, py[3] = {CAL_INSET, CAL_INSET, SH - CAL_INSET};
   uint16_t rx[3], ry[3];
   for (int i = 0; i < 3; i++) {
     int r = waitTap(px[i], py[i], rx[i], ry[i], 20000);
@@ -112,7 +124,7 @@ void runTouchCalibration() {
   {
     CfgLock l;
     markSaving();
-    prefs.putBytes("tcal3", &c, sizeof(c));
+    prefs.putBytes("tcal4", &c, sizeof(c));
   }
   Serial.printf("Touch calibration saved: axis %u, x %u..%u, y %u..%u\n", c.xAxis, c.xa, c.xb, c.ya, c.yb);
   tft.setTextColor(C_OK, C_BG);

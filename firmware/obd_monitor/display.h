@@ -474,8 +474,9 @@ void displayLoop() {
 // Reads the XPT2046 raw values and maps them with our own 3-point calibration.
 // Lower pressure threshold than the TFT_eSPI default (600), so light presses work too.
 #define TOUCH_Z_MIN 300
+#define CAL_INSET   45     // calibration crosses this far from the screen edges (clear of the case frame)
 
-struct TouchCal { uint8_t valid, xAxis; uint16_t xa, xb, ya, yb; };   // raw at screen x=20/SW-20, y=20/SH-20
+struct TouchCal { uint8_t valid, xAxis; uint16_t xa, xb, ya, yb; };   // raw at the calibration crosses
 TouchCal tcal = {0, 1, 300, 3800, 300, 3800};                         // guess until calibrated
 volatile bool touchCalRequest = false;                                 // set by the web panel
 uint16_t lastRawX = 0, lastRawY = 0, lastRawZ = 0;
@@ -483,8 +484,8 @@ int16_t  lastTouchX = -1, lastTouchY = -1;
 
 void loadTouchCal() {
   TouchCal c;
-  if (prefs.getBytesLength("tcal3") == sizeof(c)) {
-    prefs.getBytes("tcal3", &c, sizeof(c));
+  if (prefs.getBytesLength("tcal4") == sizeof(c)) {
+    prefs.getBytes("tcal4", &c, sizeof(c));
     if (c.valid == 1) tcal = c;
   }
   Serial.printf("Touch calibration: %s (axis %u, x %u..%u, y %u..%u)\n",
@@ -519,8 +520,8 @@ bool readTouch(uint16_t& x, uint16_t& y) {
   uint16_t rx, ry, z;
   if (!touchRaw(rx, ry, z)) return false;
   uint16_t ax = tcal.xAxis ? ry : rx, ay = tcal.xAxis ? rx : ry;
-  long sx = constrain(mapAxis(ax, tcal.xa, tcal.xb, 20, SW - 20), 0, SW - 1);
-  long sy = constrain(mapAxis(ay, tcal.ya, tcal.yb, 20, SH - 20), 0, SH - 1);
+  long sx = constrain(mapAxis(ax, tcal.xa, tcal.xb, CAL_INSET, SW - CAL_INSET), 0, SW - 1);
+  long sy = constrain(mapAxis(ay, tcal.ya, tcal.yb, CAL_INSET, SH - CAL_INSET), 0, SH - 1);
   x = sx; y = sy;
   lastTouchX = sx; lastTouchY = sy;
   static uint32_t lastLog = 0;
