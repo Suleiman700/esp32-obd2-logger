@@ -148,6 +148,8 @@ D19 has **only T_DO**. D19 and D23 must never touch (white screen + fake touches
 
 One Cat6 cable runs from the car to a green 7-screw terminal block on the case. **T1 is the right-most screw.**
 
+<img src="docs/images/terminal_block_wiring.jpg" width="760">
+
 | Screw | Cat6 wire | From (car side) | To (inside the box) |
 |---|---|---|---|
 | **T1** | orange + orange/white (doubled) | switched +12 V → 3 A fuse → toggle switch | LM2596 IN+ |
