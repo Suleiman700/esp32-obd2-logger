@@ -1,4 +1,4 @@
-ESP32 OBD-II MONITOR v2.0 - SETUP & USE
+ESP32 OBD-II MONITOR v3.1 - SETUP & USE
 ========================================
 
 INSTALL
@@ -21,7 +21,12 @@ FIRST USE
   - Browser: http://192.168.4.1
   - Set your internet WiFi either in Settings (web) or on the screen:
     WIFI page -> "Change WiFi" -> tap network -> type password -> Connect
-  - Touch inaccurate? WIFI page -> "Touch cal." (or hold the push button while powering on)
+  - Touch not working / taps in the wrong place? Calibrate (press 3 crosses):
+      * web panel: Settings -> "Calibrate touch screen", or
+      * hold the push button 2 s while powering on, or
+      * WIFI page -> "Touch cal."
+    Live touch values: http://192.168.4.1/api/touch (press the screen and refresh)
+    Serial Monitor also prints every touch: raw x/y/z and screen position.
 
 SCREEN
   Header: DEMO/LIVE + WiFi icon (green check = connected, yellow spinner = connecting, red X = not connected)

@@ -225,6 +225,26 @@ void handleQuery() {
   sendJson(j);
 }
 
+void handleTouchCal() {
+  touchCalRequest = true;
+  sendJson("{\"ok\":true}");
+}
+
+// Live touch status - open http://192.168.4.1/api/touch and press the screen
+void handleTouchInfo() {
+  uint16_t x, y;
+  bool down = readTouch(x, y);
+  String j = "{\"pressed\":"; j += down ? "true" : "false";
+  j += ",\"z\":";    j += lastRawZ;
+  j += ",\"rawX\":"; j += lastRawX;
+  j += ",\"rawY\":"; j += lastRawY;
+  j += ",\"x\":";    j += lastTouchX;
+  j += ",\"y\":";    j += lastTouchY;
+  j += ",\"calibrated\":"; j += tcal.valid ? "true" : "false";
+  j += "}";
+  sendJson(j);
+}
+
 void handleAck() {
   ackAlerts();
   sendJson("{\"ok\":true}");
@@ -244,6 +264,8 @@ void webBegin() {
   server.on("/api/query", HTTP_GET, handleQuery);
   server.on("/api/ack", HTTP_POST, handleAck);
   server.on("/api/clearlog", HTTP_POST, handleClearLog);
+  server.on("/api/touchcal", HTTP_POST, handleTouchCal);
+  server.on("/api/touch", HTTP_GET, handleTouchInfo);
   server.onNotFound([]() { server.sendHeader("Location", "/"); server.send(302, "text/plain", ""); });
   server.begin();
   Serial.println("Web panel ready");

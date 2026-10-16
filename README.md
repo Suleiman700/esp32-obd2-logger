@@ -204,7 +204,7 @@ To change sizes, edit the numbers at the top of the scripts in `case/v2/` and ru
 2. Install the **TFT_eSPI** library and replace its `User_Setup.h` with [`firmware/tft_espi_setup/User_Setup.h`](firmware/tft_espi_setup/User_Setup.h).
 3. Open `firmware/obd_monitor/obd_monitor.ino` and upload.
 4. Picture upside down? Set `SCREEN_ROTATION 3` in `config.h`.
-   Touch inaccurate? WIFI page → **Touch cal.**, or hold the push button for 2 s while powering on.
+   Touch not working or taps land in the wrong place? Calibrate (press 3 crosses): web panel **Settings → Calibrate touch screen**, or hold the push button 2 s while powering on, or WIFI page → **Touch cal.** Live touch values: `http://192.168.4.1/api/touch`.
 
 ## Streaming format
 Data URL (every *Send every* seconds, up to 40 records per POST):

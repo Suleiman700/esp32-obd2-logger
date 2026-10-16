@@ -79,6 +79,7 @@ h2{font-size:15px;margin:22px 0 4px}h2:first-child{margin-top:0}
 <div class="row"><button class="btn" onclick="saveSettings()">Save settings</button><span id="setmsg" class="msg"></span></div>
 <h2>Stored data</h2><p class="msg" id="loginfo"></p>
 <button class="btn bad" onclick="clearLog()">Delete stored log</button>
+<h2>Touch screen</h2><p class="msg">Touch not working or taps land in the wrong place? Start calibration here, then press the 3 crosses on the screen. Live touch values: <a href="/api/touch" target="_blank" style="color:var(--acc)">/api/touch</a></p><button class="btn" onclick="touchCal()">Calibrate touch screen</button>
 </div></section>
 </main>
 <script>
@@ -176,6 +177,7 @@ async function saveSettings(){
   $('setmsg').textContent=r.ok?('Saved ✓'+(apChanged?' - hotspot is restarting, reconnect your phone to "'+d.ap_ssid+'"':'')):(r.error||'Error');
   if(r.ok)loadCfg();
 }
+async function touchCal(){const r=await post('/api/touchcal');alert(r.ok?'Look at the device screen and press the 3 crosses':'Error');}
 async function clearLog(){if(!confirm('Delete all stored data that was not uploaded yet?'))return;const r=await post('/api/clearlog');alert(r.ok?'Deleted':'Error');}
 
 (async()=>{try{await loadCfg();await loadPids();rules=parseRules(cfg.rules);renderRules();}catch(e){}poll();})();

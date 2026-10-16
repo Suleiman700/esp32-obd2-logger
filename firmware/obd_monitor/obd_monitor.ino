@@ -1,6 +1,6 @@
 /*
   =====================================================================
-   ESP32 OBD-II Monitor  v2.0
+   ESP32 OBD-II Monitor  v3.1
   =====================================================================
    - Reads OBD-II over CAN (SN65HVD230), DEMO data when no car answers
    - Own WiFi hotspot with a web panel:  http://192.168.4.1
@@ -86,7 +86,7 @@ void setup() {
       runTouchCalibration();
     }
   }
-  Serial.printf("Touch raw Z at boot: %u (0 = no touch chip reply)\n", tft.getTouchRawZ());
+  Serial.printf("Touch raw Z at boot: %u (0 = not pressed or no reply; press the screen to see values)\n", tft.getTouchRawZ());
 
   splash("Starting CAN bus...");
   canInitialized = canInit();
@@ -105,6 +105,7 @@ void setup() {
 
 void loop() {
   server.handleClient();
+  if (touchCalRequest) { touchCalRequest = false; if (uiMode != UI_NORMAL) leaveUi(); runTouchCalibration(); }
 
   obdLoop();
   if (demoMode) simulateDemo();
