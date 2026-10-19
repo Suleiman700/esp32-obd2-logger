@@ -123,7 +123,9 @@ void handleGetConfig() {
   j += ",\"tracked\":\"";      j += hexList(cfg.tracked, cfg.trackedCount);
   j += "\",\"favs\":\"";       j += hexList(cfg.favs, cfg.favCount);
   j += "\",\"rules\":\"";      j += rulesToString();
-  j += "\"}";
+  j += "\",\"dash\":\"";       j += slotsToString();
+  j += "\",\"dash_layout\":";  j += cfg.dashLayout;
+  j += "}";
   sendJson(j);
 }
 
@@ -173,6 +175,11 @@ void handlePostConfig() {
   }
   if (server.hasArg("tracked")) cfg.trackedCount = parseHexList(server.arg("tracked"), cfg.tracked, MAX_TRACKED);
   if (server.hasArg("favs"))    cfg.favCount = parseHexList(server.arg("favs"), cfg.favs, MAX_FAVS);
+  if (server.hasArg("dash")) parseSlots(server.arg("dash"));
+  if (server.hasArg("dash_layout")) {
+    long v = server.arg("dash_layout").toInt();
+    cfg.dashLayout = (uint8_t)((v < 0 || v >= DASH_LAYOUT_COUNT) ? 0 : v);
+  }
   if (server.hasArg("rules")) {
     cfg.ruleCount = parseRules(server.arg("rules"), cfg.rules, MAX_RULES);
     resetAlertStates();
@@ -328,6 +335,73 @@ void handleUpdateDone() {
   }
 }
 
+// ---------- test buttons (Settings page) ----------
+void handleBuzzer() {
+  if (server.arg("on") == "1") buzzerTestUntil = millis() + 10000;   // beeps for max 10 s
+  else { buzzerTestUntil = 0; ackAlerts(); }                         // Stop = also silence alerts
+  sendJson("{\"ok\":true}");
+}
+
+// Own client so it never collides with the background uploader
+int testPost(const String& url, const String& body) {
+  WiFiClient plain;
+  WiFiClientSecure secure;
+  HTTPClient http;
+  bool ok;
+  if (url.startsWith("https")) { secure.setInsecure(); ok = http.begin(secure, url); }
+  else ok = http.begin(plain, url);
+  if (!ok) return -1;
+  http.setConnectTimeout(HTTP_TIMEOUT_MS);
+  http.setTimeout(HTTP_TIMEOUT_MS);
+  http.addHeader("Content-Type", "application/json");
+  int code = http.POST(body);
+  http.end();
+  return code;
+}
+
+// Same JSON format as the real uploads, with "test":true
+void handleTest() {
+  bool alert = server.arg("what") == "alert";
+  String url, device;
+  { CfgLock l; url = alert ? cfg.alertUrl : cfg.streamUrl; device = cfg.apSsid; }
+  if (!url.length()) { sendError(alert ? "Set the Alerts URL first (and Save)" : "Set the Data URL first (and Save)"); return; }
+  if (wifiState != WS_CONNECTED) { sendError("Car WiFi is not connected to the internet WiFi"); return; }
+
+  uint32_t t = nowEpoch();
+  String b = "{\"device\":\"" + jsonEsc(device) + "\",\"type\":\"" + (alert ? "alert" : "log") + "\",\"test\":true,\"records\":[{\"ts\":";
+  b += t ? String(t) : String("null");
+  if (alert) {
+    uint8_t p = cfg.ruleCount ? cfg.rules[0].pid : 0x05;
+    bool above = cfg.ruleCount ? cfg.rules[0].above : true;
+    float th = cfg.ruleCount ? cfg.rules[0].threshold : 105;
+    b += ",\"event\":\"triggered\",\"test\":true,\"pid\":\"0x" + pidHex(p);
+    b += "\",\"key\":\"" + pidKey(p) + "\",\"name\":\"TEST " + jsonEsc(pidName(p));
+    b += "\",\"condition\":\""; b += above ? ">" : "<";
+    b += "\",\"threshold\":" + fmtThreshold(th);
+    b += ",\"value\":" + jsonValue(p);
+    b += ",\"unit\":\"" + String(pidUnit(p));
+  } else {
+    b += ",\"boot\":" + String(bootCount) + ",\"uptime\":" + String(millis() / 1000);
+    b += ",\"test\":true,\"values\":{";
+    bool first = true;
+    for (uint8_t i = 0; i < cfg.trackedCount; i++) {
+      uint8_t p = cfg.tracked[i];
+      if (!isFresh(p)) continue;
+      if (!first) b += ',';
+      first = false;
+      b += "\"" + pidKey(p) + "\":" + jsonValue(p);
+    }
+    b += "}";
+  }
+  b += ",\"mode\":\""; b += demoMode ? "demo" : "live";
+  b += "\"}]}";
+
+  int code = testPost(url, b);
+  Serial.printf("Test %s -> %d\n", alert ? "alert" : "stream", code);
+  if (code >= 200 && code < 300) sendJson("{\"ok\":true,\"code\":" + String(code) + "}");
+  else sendError(code < 0 ? "No answer from the server (" + String(code) + ")" : "Server answered HTTP " + String(code));
+}
+
 void handleAck() {
   ackAlerts();
   sendJson("{\"ok\":true}");
@@ -346,6 +420,8 @@ void webBegin() {
   server.on("/api/config", HTTP_POST, handlePostConfig);
   server.on("/api/query", HTTP_GET, handleQuery);
   server.on("/api/ack", HTTP_POST, handleAck);
+  server.on("/api/buzzer", HTTP_POST, handleBuzzer);
+  server.on("/api/test", HTTP_POST, handleTest);
   server.on("/api/clearlog", HTTP_POST, handleClearLog);
   server.on("/api/touchcal", HTTP_POST, handleTouchCal);
   server.on("/api/repaint", HTTP_POST, handleRepaint);

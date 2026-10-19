@@ -3,7 +3,7 @@
 //  OBD Monitor - hardware pins and limits
 // =====================================================================
 
-#define FW_VERSION "3.5"
+#define FW_VERSION "3.6"
 
 // ---- Pins (display pins are in TFT_eSPI/User_Setup.h) ----
 #define CAN_TX_PIN  GPIO_NUM_16   // CAN board TX  (labelled RX2 on many ESP32 boards)
@@ -27,6 +27,7 @@
 #define MAX_TRACKED   16      // PIDs saved to the log / streamed
 #define MAX_FAVS      6       // PIDs on the FAV screen
 #define MAX_RULES     8       // alert rules
+#define MAX_DASH      8       // value slots on the main (DASH) screen
 #define MAX_POLL      40
 
 // ---- Storage ----

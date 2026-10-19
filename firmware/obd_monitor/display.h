@@ -267,34 +267,152 @@ uint16_t tempColor(uint8_t pid) {
   return C_OK;
 }
 
-// ---------------- DASH page ----------------
+// ---------------- DASH page (layout + values chosen in the web panel) ----------------
+// Slot styles: 0 = small box, 1 = big number (80 px high), 2 = tall big number (160 px high)
+struct DashSlot { int16_t x, y, w, h; uint8_t style; };
+struct DashLayout { const char* name; uint8_t n; DashSlot s[MAX_DASH]; };
+const DashLayout DASH_LAYOUTS[] = {
+  {"2 big + 4 small", 6, {{4, 50, 154, 80, 1}, {4, 130, 154, 80, 1},
+                          {164, 52, 74, 78, 0}, {242, 52, 74, 78, 0}, {164, 132, 74, 78, 0}, {242, 132, 74, 78, 0}}},
+  {"1 big + 4 small", 5, {{4, 50, 154, 160, 2},
+                          {164, 52, 74, 78, 0}, {242, 52, 74, 78, 0}, {164, 132, 74, 78, 0}, {242, 132, 74, 78, 0}}},
+  {"4 big", 4,           {{4, 50, 154, 80, 1}, {162, 50, 154, 80, 1}, {4, 130, 154, 80, 1}, {162, 130, 154, 80, 1}}},
+  {"6 small", 6,         {{6, 52, 100, 78, 0}, {110, 52, 100, 78, 0}, {214, 52, 100, 78, 0},
+                          {6, 132, 100, 78, 0}, {110, 132, 100, 78, 0}, {214, 132, 100, 78, 0}}},
+  {"8 small", 8,         {{5, 52, 75, 78, 0}, {82, 52, 75, 78, 0}, {159, 52, 75, 78, 0}, {236, 52, 79, 78, 0},
+                          {5, 132, 75, 78, 0}, {82, 132, 75, 78, 0}, {159, 132, 75, 78, 0}, {236, 132, 79, 78, 0}}},
+};
+#define DASH_LAYOUT_COUNT ((uint8_t)(sizeof(DASH_LAYOUTS) / sizeof(DASH_LAYOUTS[0])))
+
+const DashLayout& dashLayout() { return DASH_LAYOUTS[cfg.dashLayout < DASH_LAYOUT_COUNT ? cfg.dashLayout : 0]; }
+
+// Short screen labels for common PIDs
+String pidShort(uint8_t pid) {
+  switch (pid) {
+    case 0x04: return "LOAD";   case 0x05: return "COOLANT"; case 0x06: return "STFT";   case 0x07: return "LTFT";
+    case 0x0A: return "F.PRES"; case 0x0B: return "MAP";     case 0x0C: return "RPM";    case 0x0D: return "SPEED";
+    case 0x0E: return "TIMING"; case 0x0F: return "INTAKE";  case 0x10: return "MAF";    case 0x11: return "THROTTLE";
+    case 0x1F: return "RUN";    case 0x21: return "MIL";     case 0x2F: return "FUEL";   case 0x31: return "CLR";
+    case 0x33: return "BARO";   case 0x42: return "BATTERY"; case 0x45: return "R.THR";  case 0x46: return "AMBIENT";
+    case 0x49: return "PEDAL";  case 0x5C: return "OIL";     case 0x5E: return "F.RATE";
+    default: { String n = pidName(pid); n.toUpperCase(); return n; }
+  }
+}
+
+// Label + unit that fit in a box of width w (font 2). Unit is dropped when space is short.
+const char* slotUnit(uint8_t pid, int w) {
+  const char* u = pid == 0x0C ? "" : pidUnit(pid);              // "RPM rpm" says it twice
+  if (!*u) return u;
+  if (tft.textWidth(pidShort(pid), 2) + tft.textWidth(u, 2) + 16 > w) return "";
+  return u;
+}
+String fitLabel(uint8_t pid, int w, const char* unit) {
+  String l = pidShort(pid);
+  int avail = w - 12 - (unit && *unit ? tft.textWidth(unit, 2) + 4 : 0);
+  while (l.length() > 1 && tft.textWidth(l, 2) > avail) l.remove(l.length() - 1);
+  return l;
+}
+
+bool alertActiveFor(uint8_t pid) {
+  for (uint8_t i = 0; i < cfg.ruleCount; i++) if (cfg.rules[i].pid == pid && alertState[i].active) return true;
+  return false;
+}
+
+// Number colour: red when one of its alert rules is active, else simple per-value limits
+uint16_t valueColor(uint8_t pid) {
+  if (demoMode) return C_DEMO;
+  if (linkLost) return C_STALE;
+  if (!isFresh(pid)) return C_LABEL;
+  if (alertActiveFor(pid)) return C_BAD;
+  float v = pidData[pid].value;
+  switch (pid) {
+    case 0x05: return tempColor(pid);
+    case 0x5C: return v >= 130 ? C_BAD : (v >= 120 ? C_WARN : C_TEXT);
+    case 0x0C: return v > 5500 ? C_BAD : (v > 4000 ? C_WARN : C_TEXT);
+    case 0x42: return (v > 0 && v < 12.0f) || v > 15.0f ? C_WARN : C_TEXT;
+    case 0x2F: return v < 10 ? C_BAD : (v < 20 ? C_WARN : C_TEXT);
+    default:   return C_TEXT;
+  }
+}
+
+// Bar range for big slots (false = no bar)
+bool barRange(uint8_t pid, float& lo, float& hi) {
+  switch (pid) {
+    case 0x0C: lo = 0;  hi = 7000; return true;
+    case 0x0D: lo = 0;  hi = 200;  return true;
+    case 0x05: lo = 40; hi = 120;  return true;
+    case 0x5C: lo = 40; hi = 140;  return true;
+    case 0x42: lo = 11; hi = 15;   return true;
+  }
+  const PidDef* d = findPid(pid);
+  if (d && d->f == F_PCT) { lo = 0; hi = 100; return true; }
+  return false;
+}
+
+String   dashLast[MAX_DASH];     // last drawn text per slot (redraw only on change)
+uint16_t dashLastCol[MAX_DASH];
+uint8_t  dashLastFont[MAX_DASH];
+
 void dashStatic() {
-  tft.setTextColor(C_LABEL, C_BG);
-  tft.setTextDatum(TL_DATUM);
-  tft.drawString("RPM", 4, 54, 1);      // small font: a 4-digit RPM in font 7 starts at x=28
-  tft.drawString("km/h", 4, 152, 1);
-  boxFrame(164, 52,  74, 78, "COOL", "C");
-  boxFrame(242, 52,  74, 78, "THR", "%");
-  boxFrame(164, 132, 74, 78, "LOAD", "%");
-  boxFrame(242, 132, 74, 78, "BATT", "V");
+  const DashLayout& L = dashLayout();
+  for (uint8_t i = 0; i < MAX_DASH; i++) { dashLast[i] = "\x01"; dashLastCol[i] = 0; dashLastFont[i] = 0; }
+  for (uint8_t i = 0; i < L.n; i++) {
+    const DashSlot& s = L.s[i];
+    uint8_t p = cfg.dash[i];
+    if (s.style == 0) {
+      if (!p) { tft.drawRoundRect(s.x, s.y, s.w, s.h, 6, C_PANEL); continue; }
+      const char* u = slotUnit(p, s.w);
+      boxFrame(s.x, s.y, s.w, s.h, fitLabel(p, s.w, u), u);
+    } else {
+      if (!p) continue;
+      tft.setTextColor(C_LABEL, C_BG);
+      tft.setTextDatum(TL_DATUM);
+      const char* u = slotUnit(p, s.w);
+      tft.drawString(fitLabel(p, s.w, u), s.x + 2, s.y + 1, 2);
+      tft.setTextDatum(TR_DATUM);
+      tft.drawString(u, s.x + s.w - 2, s.y + 1, 2);
+      float lo, hi;
+      if (barRange(p, lo, hi)) drawBar(s.x + 2, s.y + s.h - 12, s.w - 4, 9, 0, C_ACCENT);
+    }
+  }
+}
+
+// Big number: 7-segment font, doubled in the tall slot when it fits, smaller font if too wide
+void bigValue(uint8_t i, const DashSlot& s, const String& v, uint16_t col) {
+  int top = s.y + 18, bottom = s.y + s.h - 14;              // area between label and bar
+  uint8_t font = 7, size = 1;
+  if (s.style == 2) { tft.setTextSize(2); if (tft.textWidth(v, 7) <= s.w - 4) size = 2; tft.setTextSize(1); }
+  if (size == 1 && tft.textWidth(v, 7) > s.w - 4) font = 4;
+  uint8_t key = font * 4 + size;
+  if (key != dashLastFont[i]) { tft.fillRect(s.x, top, s.w, bottom - top, C_BG); dashLastFont[i] = key; }
+  tft.setTextSize(size);
+  tft.setTextColor(col, C_BG);
+  tft.setTextDatum(MR_DATUM);
+  tft.setTextPadding(s.w - 4);                              // overwrite the old number without flicker
+  tft.drawString(v, s.x + s.w - 2, (top + bottom) / 2, font);
+  tft.setTextPadding(0);
+  tft.setTextSize(1);
 }
 
 void dashDynamic() {
-  tft.setTextColor(vc(C_TEXT), C_BG);
-  tft.setTextDatum(TR_DATUM);
-  tft.setTextPadding(128);
-  tft.drawString(hasDispValue(0x0C) ? String((int)pidData[0x0C].value) : "--", 156, 52, 7);
-  tft.drawString(hasDispValue(0x0D) ? String((int)pidData[0x0D].value) : "--", 156, 150, 7);
-  tft.setTextPadding(0);
-
-  float rpm = hasDispValue(0x0C) ? pidData[0x0C].value : 0;
-  drawBar(6, 108, 150, 12, rpm / 7000.0f, vc(rpm > 5500 ? C_BAD : (rpm > 4000 ? C_WARN : C_ACCENT)));
-
-  boxValue(164, 52,  74, 78, dispValue(0x05), tempColor(0x05));
-  boxValue(242, 52,  74, 78, dispValue(0x11), vc(C_TEXT));
-  boxValue(164, 132, 74, 78, dispValue(0x04), vc(C_TEXT));
-  float volt = hasDispValue(0x42) ? pidData[0x42].value : 0;
-  boxValue(242, 132, 74, 78, dispValue(0x42), vc((volt > 0 && volt < 12.0f) ? C_WARN : C_TEXT));
+  const DashLayout& L = dashLayout();
+  for (uint8_t i = 0; i < L.n; i++) {
+    const DashSlot& s = L.s[i];
+    uint8_t p = cfg.dash[i];
+    if (!p) continue;
+    String v = dispValue(p);
+    uint16_t col = valueColor(p);
+    if (v == dashLast[i] && col == dashLastCol[i]) continue;
+    dashLast[i] = v;
+    dashLastCol[i] = col;
+    if (s.style == 0) { boxValue(s.x, s.y, s.w, s.h, v, col); continue; }
+    bigValue(i, s, v, col);
+    float lo, hi;
+    if (barRange(p, lo, hi)) {
+      float frac = hasDispValue(p) ? (pidData[p].value - lo) / (hi - lo) : 0;
+      drawBar(s.x + 2, s.y + s.h - 12, s.w - 4, 9, frac, col == C_TEXT ? C_ACCENT : col);
+    }
+  }
 }
 
 // ---------------- FAV page ----------------

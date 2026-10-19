@@ -66,7 +66,9 @@ void alertsLoop() {
 void buzzerLoop() {
   static bool on = false;
   static uint32_t last = 0;
-  if (buzzerShouldSound()) {
+  bool test = buzzerTestUntil && (int32_t)(buzzerTestUntil - millis()) > 0;
+  if (!test) buzzerTestUntil = 0;
+  if (buzzerShouldSound() || test) {
     if (millis() - last >= 250) {          // beep-beep pattern
       last = millis();
       on = !on;

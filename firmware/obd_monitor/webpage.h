@@ -39,10 +39,15 @@ label.f{display:block;margin:12px 0 4px;color:var(--dim);font-size:13px}
 h2{font-size:15px;margin:22px 0 4px}h2:first-child{margin-top:0}
 .tw{overflow-x:auto;margin:0 -4px}td select{max-width:118px}.tw td,.tw th{padding:8px 3px}.x{padding:6px 10px}
 .yes{color:var(--ok)}.no{color:var(--dim)}
+#scr{position:relative;width:100%;max-width:640px;aspect-ratio:320/164;background:#080808;border:2px solid var(--line);border-radius:8px;margin:10px 0}
+.sl{position:absolute;border-radius:6px;background:#181c18;padding:3px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+.sl.big{background:#10141a;border:1px dashed #2f81f7}.sl.sel{outline:2px solid var(--warn)}
+.sl select{width:100%;padding:3px;font-size:12px}.sl .dv{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:18px}.sl.big .dv{font-size:30px}
+.sl .tg{font-size:10px;color:var(--dim)}
 </style></head><body>
 <header><h1>OBD Monitor</h1><span id="mode" class="badge">...</span><span id="wifi" class="badge">WiFi</span></header>
 <div id="alertbar"><span id="alerttext" style="flex:1"></span><button class="btn sec" onclick="ack()">Silence</button></div>
-<nav><button data-s="live" class="on">Live</button><button data-s="query">Query PID</button><button data-s="pids">Favorites &amp; Log</button><button data-s="alerts">Alerts</button><button data-s="settings">Settings</button></nav>
+<nav><button data-s="live" class="on">Live</button><button data-s="query">Query PID</button><button data-s="pids">Favorites &amp; Log</button><button data-s="alerts">Alerts</button><button data-s="dash">Main screen</button><button data-s="settings">Settings</button></nav>
 <main>
 <section id="live" class="on"><div class="grid" id="cards"></div><p class="msg" id="status"></p></section>
 
@@ -61,6 +66,13 @@ h2{font-size:15px;margin:22px 0 4px}h2:first-child{margin-top:0}
 <p class="msg">When a rule triggers: buzzer beeps, the screen shows a red bar, and an alert is sent to the Alerts URL. Push button (or tap the red bar) silences it.</p>
 <div class="tw"><table><thead><tr><th>Value</th><th>When</th><th>Limit</th><th>Now</th><th></th></tr></thead><tbody id="rules"></tbody></table></div>
 <div class="row"><button class="btn sec" onclick="addRule()">+ Add rule</button><button class="btn" onclick="saveRules()">Save</button><span id="rulemsg" class="msg"></span></div></section>
+
+<section id="dash">
+<p class="msg">Design the <b>DASH</b> page on the device. Pick a layout, then choose the value for every box. Blue dashed boxes are the <b>big</b> numbers. Tap <b>⇄</b> on two boxes to swap them.</p>
+<label class="f">Layout</label><select id="dlay" class="full" onchange="dashLayout=+this.value;renderDash()"></select>
+<div id="scr"></div>
+<div class="row"><button class="btn" onclick="saveDash()">Save to screen</button><button class="btn sec" onclick="resetDash()">Default</button><span id="dashmsg" class="msg"></span></div>
+</section>
 
 <section id="settings"><div class="card">
 <h2>WiFi with internet (for streaming)</h2>
@@ -81,6 +93,10 @@ h2{font-size:15px;margin:22px 0 4px}h2:first-child{margin-top:0}
 <div class="row"><input type="checkbox" id="button_on"><span class="msg" style="margin:0">Push button on</span></div>
 <label class="f">Auto repaint (re-starts the display to clear glitches)</label><select id="repaint" class="full"><option value="0">Off</option><option value="30">Every 30 seconds</option><option value="60">Every minute</option><option value="300">Every 5 minutes</option></select>
 <div class="row"><button class="btn" onclick="saveSettings()">Save settings</button><span id="setmsg" class="msg"></span></div>
+<h2>Tests</h2><p class="msg">Save the URLs first. Test messages have <b>"test":true</b> in the JSON so you can filter them in n8n.</p>
+<div class="row"><button class="btn" onclick="buzz(1)">🔊 Test buzzer</button><button class="btn bad" onclick="buzz(0)">■ Stop buzzer</button><span id="buzmsg" class="msg"></span></div>
+<div class="row"><button class="btn sec" onclick="testSend('stream','tsmsg')">Test stream (Data URL)</button><span id="tsmsg" class="msg"></span></div>
+<div class="row"><button class="btn sec" onclick="testSend('alert','tamsg')">Test alert (Alerts URL)</button><span id="tamsg" class="msg"></span></div>
 <h2>Stored data</h2><p class="msg" id="loginfo"></p>
 <button class="btn bad" onclick="clearLog()">Delete stored log</button>
 <h2>Touch screen</h2><p class="msg">Touch not working or taps land in the wrong place? Start calibration here, then press the 3 crosses on the screen. Live touch + button state: <a href="/api/touch" target="_blank" style="color:var(--acc)">/api/touch</a></p><button class="btn" onclick="touchCal()">Calibrate touch screen</button> <button class="btn sec" onclick="repaint()">Repaint screen now</button>
@@ -97,6 +113,7 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.s));
   if(b.dataset.s==='pids')loadPids();
   if(b.dataset.s==='settings')loadCfg();
+  if(b.dataset.s==='dash')openDash();
 });
 function post(url,data){return fetch(url,{method:'POST',body:new URLSearchParams(data||{})}).then(r=>r.json()).catch(()=>({ok:false,error:'No connection'}));}
 async function getJ(url){const r=await fetch(url);return r.json();}
@@ -123,9 +140,41 @@ function render(){
   const li='Waiting to upload: '+kb(live.log.pending)+(live.log.full?' (FULL - not saving new data)':'')+' · alerts '+kb(live.log.alertsPending);
   $('status').textContent=st+' · '+li+(w.ip?' · Car WiFi IP '+w.ip:'');
   $('loginfo').textContent=li;
+  dashVals();
   live.alerts.forEach(a=>{const c=$('now'+a.i);if(c){c.textContent=fmt(a.value)+(a.active?(a.acked?' (muted)':' ⚠'):'');c.style.color=a.active?'var(--bad)':'';}});
 }
 async function ack(){await post('/api/ack');}
+
+// ---- Main screen editor (same layouts as display.h) ----
+const LAY=[
+ {n:'2 big + 4 small',s:[[4,50,154,80,1],[4,130,154,80,1],[164,52,74,78,0],[242,52,74,78,0],[164,132,74,78,0],[242,132,74,78,0]]},
+ {n:'1 big + 4 small',s:[[4,50,154,160,2],[164,52,74,78,0],[242,52,74,78,0],[164,132,74,78,0],[242,132,74,78,0]]},
+ {n:'4 big',s:[[4,50,154,80,1],[162,50,154,80,1],[4,130,154,80,1],[162,130,154,80,1]]},
+ {n:'6 small',s:[[6,52,100,78,0],[110,52,100,78,0],[214,52,100,78,0],[6,132,100,78,0],[110,132,100,78,0],[214,132,100,78,0]]},
+ {n:'8 small',s:[[5,52,75,78,0],[82,52,75,78,0],[159,52,75,78,0],[236,52,79,78,0],[5,132,75,78,0],[82,132,75,78,0],[159,132,75,78,0],[236,132,79,78,0]]}];
+const DASH_DEF='05,0D,0C,2F,42,11,04,0F';
+let dash=DASH_DEF.split(','),dashLayout=0,swapSel=-1;
+async function openDash(){
+  if(!pidTable.length)await loadPids();
+  cfg=await getJ('/api/config');
+  dash=(cfg.dash||DASH_DEF).split(',');while(dash.length<8)dash.push('00');
+  dashLayout=cfg.dash_layout||0;
+  $('dlay').innerHTML=LAY.map((l,i)=>`<option value="${i}">${l.n}</option>`).join('');
+  $('dlay').value=dashLayout;renderDash();
+}
+function renderDash(){
+  const L=LAY[dashLayout],opts=pid=>`<option value="00">(empty)</option>`+pidTable.map(p=>`<option value="${p.pid}" ${p.pid===pid?'selected':''}>${p.name}${supportKnown&&!p.supported?' ✗':''}</option>`).join('');
+  $('scr').innerHTML=L.s.map((s,i)=>{const[x,y,w,h,st]=s;
+    return `<div class="sl${st?' big':''}${swapSel===i?' sel':''}" style="left:${x/3.2}%;top:${(y-48)/1.64}%;width:${w/3.2}%;height:${h/1.64}%">
+<div style="display:flex;gap:2px"><select onchange="dash[${i}]=this.value;renderDash()">${opts(dash[i])}</select><button class="btn sec x" style="padding:2px 6px" onclick="swapTap(${i})">⇄</button></div>
+<div class="tg">${st?'BIG':'small'}</div><div class="dv" data-dv="${dash[i]}">--</div></div>`;}).join('');
+  dashVals();
+}
+function swapTap(i){if(swapSel<0){swapSel=i;}else{if(swapSel!==i){const t=dash[i];dash[i]=dash[swapSel];dash[swapSel]=t;}swapSel=-1;}renderDash();}
+function dashVals(){if(!live)return;const m={};live.values.forEach(v=>m[v.pid]=v);
+  document.querySelectorAll('[data-dv]').forEach(e=>{const v=m[e.dataset.dv];e.innerHTML=e.dataset.dv==='00'?'':(v?fmt(v.value)+'<span class="u">'+v.unit+'</span>':'--');});}
+async function saveDash(){const r=await post('/api/config',{dash:dash.join(','),dash_layout:dashLayout});$('dashmsg').textContent=r.ok?'Saved ✓ - check the DASH page':(r.error||'Error');}
+function resetDash(){dash=DASH_DEF.split(',');dashLayout=0;$('dlay').value=0;renderDash();}
 
 async function loadPids(){
   const d=await getJ('/api/pids');pidTable=d.pids;supportKnown=d.supportKnown;
@@ -184,6 +233,8 @@ async function saveSettings(){
   $('setmsg').textContent=r.ok?('Saved ✓'+(apChanged?' - hotspot is restarting, reconnect your phone to "'+d.ap_ssid+'"':'')):(r.error||'Error');
   if(r.ok)loadCfg();
 }
+async function buzz(on){const r=await post('/api/buzzer',{on:on});$('buzmsg').textContent=r.ok?(on?'Beeping (stops by itself after 10 s)':'Stopped'):'Error';}
+async function testSend(w,m){$(m).textContent='Sending...';const r=await post('/api/test',{what:w});$(m).textContent=r.ok?'Sent ✓ server answered '+r.code:'✗ '+(r.error||'Error');}
 async function repaint(){const r=await post('/api/repaint');if(!r.ok)alert('Error');}
 function fwUpload(){const f=$('fwfile').files[0];if(!f){alert('Choose the .bin file first');return;}
  if(!confirm('Install '+f.name+' ('+Math.round(f.size/1024)+' KB)?'))return;

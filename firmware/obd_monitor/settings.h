@@ -41,6 +41,33 @@ uint8_t parseHexList(const String& in, uint8_t* out, uint8_t maxN) {
   return n;
 }
 
+// Main screen slots keep their position: "05,0D,00,2F" (00 = empty slot)
+String slotsToString() {
+  String s;
+  char b[4];
+  for (uint8_t i = 0; i < MAX_DASH; i++) {
+    if (i) s += ',';
+    snprintf(b, sizeof(b), "%02X", cfg.dash[i]);
+    s += b;
+  }
+  return s;
+}
+
+void parseSlots(const String& in) {
+  for (uint8_t i = 0; i < MAX_DASH; i++) cfg.dash[i] = 0;
+  uint8_t n = 0;
+  int start = 0;
+  String s = in + ",";
+  for (int i = 0; i < (int)s.length() && n < MAX_DASH; i++) {
+    if (s[i] != ',') continue;
+    String tok = s.substring(start, i);
+    start = i + 1;
+    tok.trim();
+    long v = tok.length() ? strtol(tok.c_str(), nullptr, 16) : 0;
+    cfg.dash[n++] = (v < 0 || v > 255) ? 0 : (uint8_t)v;
+  }
+}
+
 // "05>105;42<11.5"
 String rulesToString() {
   String s;
@@ -101,6 +128,9 @@ void loadSettings() {
   cfg.trackedCount   = parseHexList(prefs.getString("track", "0C,0D,05,11,04,0F,42"), cfg.tracked, MAX_TRACKED);
   cfg.favCount       = parseHexList(prefs.getString("favs", "0C,0D,05,42"), cfg.favs, MAX_FAVS);
   cfg.ruleCount      = parseRules(prefs.getString("rules", "05>105"), cfg.rules, MAX_RULES);
+  // default main screen: big Coolant + Speed, small RPM / Fuel / Battery / Throttle
+  parseSlots(prefs.getString("dash", "05,0D,0C,2F,42,11,04,0F"));
+  cfg.dashLayout     = prefs.getUChar("dlay", 0);
   logOffset          = prefs.getUInt("logoff", 0);
   alertOffset        = prefs.getUInt("aoff", 0);
   bootCount          = prefs.getUInt("boot", 0) + 1;
@@ -130,5 +160,7 @@ void saveSettingsUnlocked() {
   prefs.putString("track", hexList(cfg.tracked, cfg.trackedCount));
   prefs.putString("favs", hexList(cfg.favs, cfg.favCount));
   prefs.putString("rules", rulesToString());
+  prefs.putString("dash", slotsToString());
+  prefs.putUChar("dlay", cfg.dashLayout);
 }
 
