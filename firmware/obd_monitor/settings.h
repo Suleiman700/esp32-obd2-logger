@@ -131,6 +131,8 @@ void loadSettings() {
   // default main screen: big Coolant + Speed, small RPM / Fuel / Battery / Throttle
   parseSlots(prefs.getString("dash", "05,0D,0C,2F,42,11,04,0F"));
   cfg.dashLayout     = prefs.getUChar("dlay", 0);
+  cfg.dashIcons      = prefs.getUChar("dico", 0);
+  cfg.labelRgb       = prefs.getUInt("lblc", 0x989898);
   logOffset          = prefs.getUInt("logoff", 0);
   alertOffset        = prefs.getUInt("aoff", 0);
   bootCount          = prefs.getUInt("boot", 0) + 1;
@@ -162,5 +164,7 @@ void saveSettingsUnlocked() {
   prefs.putString("rules", rulesToString());
   prefs.putString("dash", slotsToString());
   prefs.putUChar("dlay", cfg.dashLayout);
+  prefs.putUChar("dico", cfg.dashIcons);
+  prefs.putUInt("lblc", cfg.labelRgb);
 }
 

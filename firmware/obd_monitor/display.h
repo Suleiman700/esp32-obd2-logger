@@ -7,6 +7,7 @@
 // =====================================================================
 
 TFT_eSPI tft = TFT_eSPI();
+#include "icons.h"
 
 #define C_BG      0x0841
 #define C_HEADER  0x10A2
@@ -291,9 +292,9 @@ String pidShort(uint8_t pid) {
   switch (pid) {
     case 0x04: return "LOAD";   case 0x05: return "COOLANT"; case 0x06: return "STFT";   case 0x07: return "LTFT";
     case 0x0A: return "F.PRES"; case 0x0B: return "MAP";     case 0x0C: return "RPM";    case 0x0D: return "SPEED";
-    case 0x0E: return "TIMING"; case 0x0F: return "INTAKE";  case 0x10: return "MAF";    case 0x11: return "THROTTLE";
+    case 0x0E: return "TIMING"; case 0x0F: return "INTAKE";  case 0x10: return "MAF";    case 0x11: return "THR";
     case 0x1F: return "RUN";    case 0x21: return "MIL";     case 0x2F: return "FUEL";   case 0x31: return "CLR";
-    case 0x33: return "BARO";   case 0x42: return "BATTERY"; case 0x45: return "R.THR";  case 0x46: return "AMBIENT";
+    case 0x33: return "BARO";   case 0x42: return "BATT"; case 0x45: return "R.THR";  case 0x46: return "AMBIENT";
     case 0x49: return "PEDAL";  case 0x5C: return "OIL";     case 0x5E: return "F.RATE";
     default: { String n = pidName(pid); n.toUpperCase(); return n; }
   }
@@ -353,45 +354,77 @@ String   dashLast[MAX_DASH];     // last drawn text per slot (redraw only on cha
 uint16_t dashLastCol[MAX_DASH];
 uint8_t  dashLastFont[MAX_DASH];
 
+uint16_t labelColor() {
+  uint32_t c = cfg.labelRgb;
+  return tft.color565((c >> 16) & 0xFF, (c >> 8) & 0xFF, c & 0xFF);
+}
+
+// Label mode for one slot: 0 text, 1 icon, 2 icon + text (falls back to text when the PID has no icon)
+uint8_t slotMode(uint8_t pid) { return (cfg.dashIcons && pidIconId(pid)) ? cfg.dashIcons : 0; }
+
+// Where the number goes inside a big slot (x0..x1, y0..y1)
+void bigArea(const DashSlot& s, uint8_t mode, int& x0, int& y0, int& x1, int& y1) {
+  x0 = s.x; x1 = s.x + s.w; y0 = s.y + 18; y1 = s.y + s.h - 14;
+  if (!mode) return;
+  if (s.style == 2) y0 = s.y + 50;                          // tall: icon row on top
+  else x0 = s.x + 50;                                       // 80 px slot: icon column on the left
+}
+
 void dashStatic() {
   const DashLayout& L = dashLayout();
+  uint16_t lc = labelColor();
   for (uint8_t i = 0; i < MAX_DASH; i++) { dashLast[i] = "\x01"; dashLastCol[i] = 0; dashLastFont[i] = 0; }
   for (uint8_t i = 0; i < L.n; i++) {
     const DashSlot& s = L.s[i];
     uint8_t p = cfg.dash[i];
-    if (s.style == 0) {
+    uint8_t m = slotMode(p);
+    const char* u = slotUnit(p, s.w);
+    if (s.style == 0) {                                     // ---- small box
       if (!p) { tft.drawRoundRect(s.x, s.y, s.w, s.h, 6, C_PANEL); continue; }
-      const char* u = slotUnit(p, s.w);
-      boxFrame(s.x, s.y, s.w, s.h, fitLabel(p, s.w, u), u);
-    } else {
-      if (!p) continue;
-      tft.setTextColor(C_LABEL, C_BG);
-      tft.setTextDatum(TL_DATUM);
-      const char* u = slotUnit(p, s.w);
-      tft.drawString(fitLabel(p, s.w, u), s.x + 2, s.y + 1, 2);
-      tft.setTextDatum(TR_DATUM);
-      tft.drawString(u, s.x + s.w - 2, s.y + 1, 2);
-      float lo, hi;
-      if (barRange(p, lo, hi)) drawBar(s.x + 2, s.y + s.h - 12, s.w - 4, 9, 0, C_ACCENT);
+      tft.fillRoundRect(s.x, s.y, s.w, s.h, 6, C_PANEL);
+      tft.setTextColor(lc, C_PANEL);
+      if (m != 1) { tft.setTextDatum(TL_DATUM); tft.drawString(fitLabel(p, s.w, u), s.x + 6, s.y + 4, 2); }
+      if (*u)     { tft.setTextDatum(TR_DATUM); tft.drawString(u, s.x + s.w - 6, s.y + 4, 2); }
+      if (m == 1) {                                         // icon as big as fits beside the unit
+        int sz = s.w - 16 - (*u ? tft.textWidth(u, 2) + 4 : 0);
+        if (sz > 38) sz = 38;
+        if (sz < 24) sz = 24;
+        drawPidIcon(p, s.x + 5, s.y + 5, sz, lc, C_PANEL);
+      }
+      if (m == 2) drawPidIcon(p, s.x + 6, s.y + 22, 25, lc, C_PANEL);
+      continue;
     }
+    if (!p) continue;                                       // ---- big number
+    tft.setTextColor(lc, C_BG);
+    if (*u) { tft.setTextDatum(TR_DATUM); tft.drawString(u, s.x + s.w - 2, s.y + 1, 2); }
+    if (s.style == 2 && m) {                                // tall: icon top-left, label next to it
+      drawPidIcon(p, s.x + 2, s.y + 2, 46, lc, C_BG);
+      if (m == 2) { tft.setTextDatum(ML_DATUM); tft.drawString(fitLabel(p, s.w - 52, u), s.x + 54, s.y + 25, 2); }
+    } else {
+      if (m != 1) { tft.setTextDatum(TL_DATUM); tft.drawString(fitLabel(p, s.w, u), s.x + 2, s.y + 1, 2); }
+      if (m == 1) drawPidIcon(p, s.x + 1, s.y + 10, 46, lc, C_BG);
+      if (m == 2) drawPidIcon(p, s.x + 3, s.y + 21, 42, lc, C_BG);
+    }
+    float lo, hi;
+    if (barRange(p, lo, hi)) drawBar(s.x + 2, s.y + s.h - 12, s.w - 4, 9, 0, C_ACCENT);
   }
 }
 
-// Big number: 7-segment font, doubled in the tall slot when it fits, smaller font if too wide
-void bigValue(uint8_t i, const DashSlot& s, const String& v, uint16_t col) {
-  int top = s.y + 18, bottom = s.y + s.h - 14;              // area between label and bar
-  uint8_t font = 7, size = 1;
-  if (s.style == 2) { tft.setTextSize(2); if (tft.textWidth(v, 7) <= s.w - 4) size = 2; tft.setTextSize(1); }
-  if (size == 1 && tft.textWidth(v, 7) > s.w - 4) font = 4;
-  uint8_t key = font * 4 + size;
-  if (key != dashLastFont[i]) { tft.fillRect(s.x, top, s.w, bottom - top, C_BG); dashLastFont[i] = key; }
-  tft.setTextSize(size);
+// Big number: largest font that fits (tall slot tries the 75 px font first), redrawn without flicker
+void bigValue(uint8_t i, const DashSlot& s, uint8_t mode, const String& v, uint16_t col) {
+  int x0, y0, x1, y1;
+  bigArea(s, mode, x0, y0, x1, y1);
+  int avail = x1 - x0 - 4;
+  uint8_t font = 4;
+  if (s.style == 2 && y1 - y0 >= 76 && tft.textWidth(v, 8) <= avail) font = 8;
+  else if (tft.textWidth(v, 7) <= avail) font = 7;
+  else if (tft.textWidth(v, 6) <= avail) font = 6;
+  if (font != dashLastFont[i]) { tft.fillRect(x0, y0, x1 - x0, y1 - y0, C_BG); dashLastFont[i] = font; }
   tft.setTextColor(col, C_BG);
   tft.setTextDatum(MR_DATUM);
-  tft.setTextPadding(s.w - 4);                              // overwrite the old number without flicker
-  tft.drawString(v, s.x + s.w - 2, (top + bottom) / 2, font);
+  tft.setTextPadding(avail);                                // overwrite the old number without flicker
+  tft.drawString(v, x1 - 2, (y0 + y1) / 2, font);
   tft.setTextPadding(0);
-  tft.setTextSize(1);
 }
 
 void dashDynamic() {
@@ -406,7 +439,7 @@ void dashDynamic() {
     dashLast[i] = v;
     dashLastCol[i] = col;
     if (s.style == 0) { boxValue(s.x, s.y, s.w, s.h, v, col); continue; }
-    bigValue(i, s, v, col);
+    bigValue(i, s, slotMode(p), v, col);
     float lo, hi;
     if (barRange(p, lo, hi)) {
       float frac = hasDispValue(p) ? (pidData[p].value - lo) / (hi - lo) : 0;

@@ -44,6 +44,8 @@ struct Settings {
   uint8_t  favs[MAX_FAVS];       uint8_t favCount;
   uint8_t  dash[MAX_DASH];       // PID per main-screen slot (0 = empty)
   uint8_t  dashLayout;           // index into DASH_LAYOUTS (display.h)
+  uint8_t  dashIcons;            // main screen labels: 0 text, 1 icon, 2 icon + text
+  uint32_t labelRgb;             // main screen label / icon colour, 0xRRGGBB
   Rule     rules[MAX_RULES];     uint8_t ruleCount;
 };
 Settings   cfg;

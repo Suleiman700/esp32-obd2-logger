@@ -3,7 +3,7 @@
 //  OBD Monitor - hardware pins and limits
 // =====================================================================
 
-#define FW_VERSION "3.6"
+#define FW_VERSION "3.6.1"
 
 // ---- Pins (display pins are in TFT_eSPI/User_Setup.h) ----
 #define CAN_TX_PIN  GPIO_NUM_16   // CAN board TX  (labelled RX2 on many ESP32 boards)

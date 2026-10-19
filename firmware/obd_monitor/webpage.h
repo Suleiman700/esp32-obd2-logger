@@ -43,7 +43,8 @@ h2{font-size:15px;margin:22px 0 4px}h2:first-child{margin-top:0}
 .sl{position:absolute;border-radius:6px;background:#181c18;padding:3px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
 .sl.big{background:#10141a;border:1px dashed #2f81f7}.sl.sel{outline:2px solid var(--warn)}
 .sl select{width:100%;padding:3px;font-size:12px}.sl .dv{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:18px}.sl.big .dv{font-size:30px}
-.sl .tg{font-size:10px;color:var(--dim)}
+.sl .tg{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;line-height:1.3;min-height:1.3em}.sl.big .tg{font-size:13px}.sl .ic{font-size:22px;line-height:1}.sl.big .ic{font-size:34px}
+.swc{display:inline-block;width:30px;height:30px;border-radius:6px;border:2px solid var(--line);margin-right:6px;cursor:pointer;vertical-align:middle}
 </style></head><body>
 <header><h1>OBD Monitor</h1><span id="mode" class="badge">...</span><span id="wifi" class="badge">WiFi</span></header>
 <div id="alertbar"><span id="alerttext" style="flex:1"></span><button class="btn sec" onclick="ack()">Silence</button></div>
@@ -68,8 +69,11 @@ h2{font-size:15px;margin:22px 0 4px}h2:first-child{margin-top:0}
 <div class="row"><button class="btn sec" onclick="addRule()">+ Add rule</button><button class="btn" onclick="saveRules()">Save</button><span id="rulemsg" class="msg"></span></div></section>
 
 <section id="dash">
-<p class="msg">Design the <b>DASH</b> page on the device. Pick a layout, then choose the value for every box. Blue dashed boxes are the <b>big</b> numbers. Tap <b>⇄</b> on two boxes to swap them.</p>
+<p class="msg">Design the <b>DASH</b> page on the device. Pick a layout, then choose the value for every box. Blue dashed boxes are the <b>big</b> numbers. Icons here are only a preview; the screen draws its own. Tap <b>⇄</b> on two boxes to swap them.</p>
 <label class="f">Layout</label><select id="dlay" class="full" onchange="dashLayout=+this.value;renderDash()"></select>
+<label class="f">Labels (icons are big so you can read them from far)</label><select id="dico" class="full" onchange="dashIcons=+this.value;renderDash()"><option value="0">Text only</option><option value="1">Icon only</option><option value="2">Icon + text</option></select>
+<label class="f">Label / icon colour</label>
+<div class="row" style="margin-top:4px"><input type="color" id="lblc" value="#989898" oninput="labelColor=this.value;renderDash()" style="width:56px;height:40px;padding:2px"><span id="sw"></span></div>
 <div id="scr"></div>
 <div class="row"><button class="btn" onclick="saveDash()">Save to screen</button><button class="btn sec" onclick="resetDash()">Default</button><span id="dashmsg" class="msg"></span></div>
 </section>
@@ -153,12 +157,17 @@ const LAY=[
  {n:'6 small',s:[[6,52,100,78,0],[110,52,100,78,0],[214,52,100,78,0],[6,132,100,78,0],[110,132,100,78,0],[214,132,100,78,0]]},
  {n:'8 small',s:[[5,52,75,78,0],[82,52,75,78,0],[159,52,75,78,0],[236,52,79,78,0],[5,132,75,78,0],[82,132,75,78,0],[159,132,75,78,0],[236,132,79,78,0]]}];
 const DASH_DEF='05,0D,0C,2F,42,11,04,0F';
-let dash=DASH_DEF.split(','),dashLayout=0,swapSel=-1;
+let dash=DASH_DEF.split(','),dashLayout=0,swapSel=-1,dashIcons=0,labelColor='#989898';
+const SWATCH=['#989898','#ffffff','#00e5ff','#2f81f7','#3fb950','#ffd400','#ff9f1a','#ff4d4d','#d066ff'];
+const ICO={'05':'🌡️','0F':'🌡️','46':'🌡️','0D':'⏲️','0C':'⏲️','0A':'⏲️','0B':'⏲️','33':'⏲️','2F':'⛽','42':'🔋','11':'🦶','45':'🦶','49':'🦶','5C':'🛢️','04':'⚙️','1F':'🕒','5E':'💧','10':'💨'};
+const SHORT={'04':'LOAD','05':'COOLANT','0C':'RPM','0D':'SPEED','0F':'INTAKE','11':'THR','2F':'FUEL','42':'BATT','46':'AMBIENT','49':'PEDAL','5C':'OIL','5E':'F.RATE','10':'MAF','0B':'MAP','1F':'RUN','33':'BARO'};
 async function openDash(){
   if(!pidTable.length)await loadPids();
   cfg=await getJ('/api/config');
   dash=(cfg.dash||DASH_DEF).split(',');while(dash.length<8)dash.push('00');
-  dashLayout=cfg.dash_layout||0;
+  dashLayout=cfg.dash_layout||0;dashIcons=cfg.dash_icons||0;labelColor=cfg.label_color||'#989898';
+  $('dico').value=dashIcons;$('lblc').value=labelColor;
+  $('sw').innerHTML=SWATCH.map(c=>`<span class="swc" style="background:${c}" onclick="labelColor='${c}';$('lblc').value='${c}';renderDash()"></span>`).join('');
   $('dlay').innerHTML=LAY.map((l,i)=>`<option value="${i}">${l.n}</option>`).join('');
   $('dlay').value=dashLayout;renderDash();
 }
@@ -167,14 +176,17 @@ function renderDash(){
   $('scr').innerHTML=L.s.map((s,i)=>{const[x,y,w,h,st]=s;
     return `<div class="sl${st?' big':''}${swapSel===i?' sel':''}" style="left:${x/3.2}%;top:${(y-48)/1.64}%;width:${w/3.2}%;height:${h/1.64}%">
 <div style="display:flex;gap:2px"><select onchange="dash[${i}]=this.value;renderDash()">${opts(dash[i])}</select><button class="btn sec x" style="padding:2px 6px" onclick="swapTap(${i})">⇄</button></div>
-<div class="tg">${st?'BIG':'small'}</div><div class="dv" data-dv="${dash[i]}">--</div></div>`;}).join('');
+<div class="tg" style="color:${labelColor}">${lab(dash[i],st)}</div><div class="dv" data-dv="${dash[i]}">--</div></div>`;}).join('');
   dashVals();
 }
+function lab(pid,st){if(pid==='00')return '<span style="color:var(--dim)">(empty)</span>';const p=pidTable.find(x=>x.pid===pid)||{name:pid,unit:''};
+  const t=SHORT[pid]||p.name.toUpperCase(),ic=ICO[pid],m=ic?dashIcons:0,big=st?' BIG':'';
+  return m===1?`<span class="ic">${ic}</span>`:m===2?`<span class="ic">${ic}</span> ${t}`:t;}
 function swapTap(i){if(swapSel<0){swapSel=i;}else{if(swapSel!==i){const t=dash[i];dash[i]=dash[swapSel];dash[swapSel]=t;}swapSel=-1;}renderDash();}
 function dashVals(){if(!live)return;const m={};live.values.forEach(v=>m[v.pid]=v);
   document.querySelectorAll('[data-dv]').forEach(e=>{const v=m[e.dataset.dv];e.innerHTML=e.dataset.dv==='00'?'':(v?fmt(v.value)+'<span class="u">'+v.unit+'</span>':'--');});}
-async function saveDash(){const r=await post('/api/config',{dash:dash.join(','),dash_layout:dashLayout});$('dashmsg').textContent=r.ok?'Saved ✓ - check the DASH page':(r.error||'Error');}
-function resetDash(){dash=DASH_DEF.split(',');dashLayout=0;$('dlay').value=0;renderDash();}
+async function saveDash(){const r=await post('/api/config',{dash:dash.join(','),dash_layout:dashLayout,dash_icons:dashIcons,label_color:labelColor});$('dashmsg').textContent=r.ok?'Saved ✓ - check the DASH page':(r.error||'Error');}
+function resetDash(){dash=DASH_DEF.split(',');dashLayout=0;dashIcons=0;labelColor='#989898';$('dlay').value=0;$('dico').value=0;$('lblc').value=labelColor;renderDash();}
 
 async function loadPids(){
   const d=await getJ('/api/pids');pidTable=d.pids;supportKnown=d.supportKnown;

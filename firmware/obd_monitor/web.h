@@ -125,6 +125,9 @@ void handleGetConfig() {
   j += "\",\"rules\":\"";      j += rulesToString();
   j += "\",\"dash\":\"";       j += slotsToString();
   j += "\",\"dash_layout\":";  j += cfg.dashLayout;
+  j += ",\"dash_icons\":";     j += cfg.dashIcons;
+  char lc[8]; snprintf(lc, sizeof(lc), "#%06lX", (unsigned long)(cfg.labelRgb & 0xFFFFFF));
+  j += ",\"label_color\":\""; j += lc; j += "\"";
   j += "}";
   sendJson(j);
 }
@@ -179,6 +182,12 @@ void handlePostConfig() {
   if (server.hasArg("dash_layout")) {
     long v = server.arg("dash_layout").toInt();
     cfg.dashLayout = (uint8_t)((v < 0 || v >= DASH_LAYOUT_COUNT) ? 0 : v);
+  }
+  if (server.hasArg("dash_icons")) { long v = server.arg("dash_icons").toInt(); cfg.dashIcons = (uint8_t)(v < 0 || v > 2 ? 0 : v); }
+  if (server.hasArg("label_color")) {
+    String c = server.arg("label_color"); c.trim();
+    if (c.startsWith("#")) c = c.substring(1);
+    if (c.length() == 6) cfg.labelRgb = strtoul(c.c_str(), nullptr, 16) & 0xFFFFFF;
   }
   if (server.hasArg("rules")) {
     cfg.ruleCount = parseRules(server.arg("rules"), cfg.rules, MAX_RULES);
