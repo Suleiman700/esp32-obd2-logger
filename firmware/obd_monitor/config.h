@@ -3,12 +3,13 @@
 //  OBD Monitor - hardware pins and limits
 // =====================================================================
 
-#define FW_VERSION "3.6.1"
+#define FW_VERSION "3.6.2"
 
 // ---- Pins (display pins are in TFT_eSPI/User_Setup.h) ----
 #define CAN_TX_PIN  GPIO_NUM_16   // CAN board TX  (labelled RX2 on many ESP32 boards)
 #define CAN_RX_PIN  GPIO_NUM_5    // CAN board RX
 #define BUTTON_PIN  13            // Push button -> GND. Cycles pages / silences buzzer
+#define USE_BUTTON  0             // 0 = push button fully ignored (pin is never read), 1 = enabled
 #define BUZZER_PIN  25            // Buzzer + (other leg to GND)
 
 // ---- Screen orientation ----

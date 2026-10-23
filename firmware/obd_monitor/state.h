@@ -40,6 +40,8 @@ struct Settings {
   bool     touchOn;          // false = never talk to the touch chip
   bool     buttonOn;         // false = ignore the push button
   uint16_t repaintSec;       // 0 = off, else re-start + redraw the display every N seconds
+  uint16_t cycleSec;         // 0 = off, else switch to the next page every N seconds
+  bool     cycleDash;        // auto-cycle: stay on DASH while the car is moving
   uint8_t  tracked[MAX_TRACKED]; uint8_t trackedCount;
   uint8_t  favs[MAX_FAVS];       uint8_t favCount;
   uint8_t  dash[MAX_DASH];       // PID per main-screen slot (0 = empty)

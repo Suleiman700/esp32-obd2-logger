@@ -582,7 +582,29 @@ void drawPageDynamic() {
   }
 }
 
+uint32_t pageShownAt = 0;    // for auto page cycling
+
+void showPage(int p) {
+  if (p < 0 || p >= PAGE_COUNT) return;
+  currentPage = (Page)p;
+  pageShownAt = millis();
+  needsFullRedraw = true;
+}
+
+// Auto page cycle (replaces the push button). Optional: stay on DASH while driving.
+void pageCycleLoop() {
+  if (!cfg.cycleSec) return;
+  bool moving = isFresh(0x0D) && pidData[0x0D].value > 5;
+  if (cfg.cycleDash && moving) {
+    if (currentPage != PG_DASH) showPage(PG_DASH);
+    pageShownAt = millis();
+    return;
+  }
+  if (millis() - pageShownAt >= (uint32_t)cfg.cycleSec * 1000UL) showPage((currentPage + 1) % PAGE_COUNT);
+}
+
 void nextPage() {
+  pageShownAt = millis();
   currentPage = (Page)((currentPage + 1) % PAGE_COUNT);
   needsFullRedraw = true;
   Serial.printf("Page -> %s\n", pageNames[currentPage]);
@@ -599,6 +621,7 @@ void repaintDisplay() {
 }
 
 void displayLoop() {
+  pageCycleLoop();
   static uint32_t lastRepaint = 0;
   if (repaintRequest || (cfg.repaintSec && millis() - lastRepaint >= (uint32_t)cfg.repaintSec * 1000UL)) {
     if (repaintRequest) Serial.println("Display repaint (web panel)");

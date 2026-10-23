@@ -50,7 +50,7 @@ h2{font-size:15px;margin:22px 0 4px}h2:first-child{margin-top:0}
 <div id="alertbar"><span id="alerttext" style="flex:1"></span><button class="btn sec" onclick="ack()">Silence</button></div>
 <nav><button data-s="live" class="on">Live</button><button data-s="query">Query PID</button><button data-s="pids">Favorites &amp; Log</button><button data-s="alerts">Alerts</button><button data-s="dash">Main screen</button><button data-s="settings">Settings</button></nav>
 <main>
-<section id="live" class="on"><div class="grid" id="cards"></div><p class="msg" id="status"></p></section>
+<section id="live" class="on"><div class="row" style="margin:0 0 12px"><span class="msg" style="margin:0">Device screen:</span><button class="btn sec x" onclick="page(0)">DASH</button><button class="btn sec x" onclick="page(1)">FAV</button><button class="btn sec x" onclick="page(2)">ALERTS</button><button class="btn sec x" onclick="page(3)">WIFI</button></div><div class="grid" id="cards"></div><p class="msg" id="status"></p></section>
 
 <section id="query"><div class="card">
 <label class="f">PID number in hex (Mode 01), e.g. 0C = RPM, 5C = oil temp</label>
@@ -64,7 +64,7 @@ h2{font-size:15px;margin:22px 0 4px}h2:first-child{margin-top:0}
 <div class="row"><button class="btn" onclick="savePids()">Save</button><span id="pidmsg" class="msg"></span></div></section>
 
 <section id="alerts">
-<p class="msg">When a rule triggers: buzzer beeps, the screen shows a red bar, and an alert is sent to the Alerts URL. Push button (or tap the red bar) silences it.</p>
+<p class="msg">When a rule triggers: buzzer beeps, the screen shows a red bar, and an alert is sent to the Alerts URL. Silence it with the <b>Silence</b> button at the top of this panel (or Settings → Stop buzzer).</p>
 <div class="tw"><table><thead><tr><th>Value</th><th>When</th><th>Limit</th><th>Now</th><th></th></tr></thead><tbody id="rules"></tbody></table></div>
 <div class="row"><button class="btn sec" onclick="addRule()">+ Add rule</button><button class="btn" onclick="saveRules()">Save</button><span id="rulemsg" class="msg"></span></div></section>
 
@@ -94,7 +94,9 @@ h2{font-size:15px;margin:22px 0 4px}h2:first-child{margin-top:0}
 <div class="row"><input type="checkbox" id="log_demo"><span class="msg" style="margin:0">Also save/stream DEMO data (for testing)</span></div>
 <h2>Screen</h2>
 <div class="row"><input type="checkbox" id="touch_on"><span class="msg" style="margin:0">Touch screen on</span></div>
-<div class="row"><input type="checkbox" id="button_on"><span class="msg" style="margin:0">Push button on</span></div>
+<p class="msg" id="btnnote">Push button: disabled in this firmware. Change pages with the buttons on the Live tab or automatically:</p>
+<label class="f">Change pages automatically</label><select id="cycle" class="full"><option value="0">Off</option><option value="10">Every 10 seconds</option><option value="20">Every 20 seconds</option><option value="30">Every 30 seconds</option><option value="60">Every minute</option></select>
+<div class="row"><input type="checkbox" id="cycle_dash"><span class="msg" style="margin:0">Stay on DASH while the car is moving</span></div>
 <label class="f">Auto repaint (re-starts the display to clear glitches)</label><select id="repaint" class="full"><option value="0">Off</option><option value="30">Every 30 seconds</option><option value="60">Every minute</option><option value="300">Every 5 minutes</option></select>
 <div class="row"><button class="btn" onclick="saveSettings()">Save settings</button><span id="setmsg" class="msg"></span></div>
 <h2>Tests</h2><p class="msg">Save the URLs first. Test messages have <b>"test":true</b> in the JSON so you can filter them in n8n.</p>
@@ -147,6 +149,7 @@ function render(){
   dashVals();
   live.alerts.forEach(a=>{const c=$('now'+a.i);if(c){c.textContent=fmt(a.value)+(a.active?(a.acked?' (muted)':' ⚠'):'');c.style.color=a.active?'var(--bad)':'';}});
 }
+async function page(p){await post('/api/page',{p:p});}
 async function ack(){await post('/api/ack');}
 
 // ---- Main screen editor (same layouts as display.h) ----
@@ -232,13 +235,13 @@ async function addLog(){
 async function loadCfg(){
   cfg=await getJ('/api/config');
   ['wifi_ssid','ap_ssid','ap_pass','stream_url','alert_url'].forEach(k=>$(k).value=cfg[k]||'');
-  $('stream_int').value=cfg.stream_int;$('log_int').value=cfg.log_int;$('log_demo').checked=cfg.log_demo;$('touch_on').checked=cfg.touch_on;$('button_on').checked=cfg.button_on;$('fwver').textContent=cfg.fw||'?';$('repaint').value=String(cfg.repaint);
+  $('stream_int').value=cfg.stream_int;$('log_int').value=cfg.log_int;$('log_demo').checked=cfg.log_demo;$('touch_on').checked=cfg.touch_on;$('cycle').value=String(cfg.cycle||0);$('cycle_dash').checked=cfg.cycle_dash!==false;$('fwver').textContent=cfg.fw||'?';$('repaint').value=String(cfg.repaint);
   $('passhint').textContent=cfg.wifi_pass_set?'(saved)':'';$('wifi_pass').value='';$('wifi_open').checked=false;
 }
 async function saveSettings(){
   const ap=$('ap_pass').value;
   if(ap.length>0&&ap.length<8){$('setmsg').textContent='Hotspot password needs 8+ characters';return;}
-  const d={wifi_ssid:$('wifi_ssid').value,ap_ssid:$('ap_ssid').value,ap_pass:ap,stream_url:$('stream_url').value,alert_url:$('alert_url').value,stream_int:$('stream_int').value,log_int:$('log_int').value,log_demo:$('log_demo').checked?1:0,touch_on:$('touch_on').checked?1:0,button_on:$('button_on').checked?1:0,repaint:$('repaint').value};
+  const d={wifi_ssid:$('wifi_ssid').value,ap_ssid:$('ap_ssid').value,ap_pass:ap,stream_url:$('stream_url').value,alert_url:$('alert_url').value,stream_int:$('stream_int').value,log_int:$('log_int').value,log_demo:$('log_demo').checked?1:0,touch_on:$('touch_on').checked?1:0,cycle:$('cycle').value,cycle_dash:$('cycle_dash').checked?1:0,repaint:$('repaint').value};
   if($('wifi_open').checked)d.wifi_pass='';else if($('wifi_pass').value)d.wifi_pass=$('wifi_pass').value;
   const apChanged=d.ap_ssid!==cfg.ap_ssid||d.ap_pass!==cfg.ap_pass;
   const r=await post('/api/config',d);

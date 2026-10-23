@@ -47,7 +47,7 @@ int waitTap(int px, int py, uint16_t& rx, uint16_t& ry, uint32_t timeoutMs) {
   uint32_t lastLog = 0, btnSince = 0;
   while (!touchRaw(x, y, z)) {
     if (millis() - t0 > timeoutMs) { drawCross(px, py, C_BG); return 1; }
-    if (digitalRead(BUTTON_PIN) == LOW) {                              // cancel: hold the button 0.3 s
+    if (USE_BUTTON && digitalRead(BUTTON_PIN) == LOW) {                // cancel: hold the button 0.3 s
       if (!btnSince) btnSince = millis();
       if (millis() - btnSince > 300 && millis() - t0 > 500) { drawCross(px, py, C_BG); return 2; }
     } else btnSince = 0;

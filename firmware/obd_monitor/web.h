@@ -120,6 +120,9 @@ void handleGetConfig() {
   j += ",\"touch_on\":";       j += cfg.touchOn ? "true" : "false";
   j += ",\"button_on\":";      j += cfg.buttonOn ? "true" : "false";
   j += ",\"repaint\":";        j += cfg.repaintSec;
+  j += ",\"cycle\":";          j += cfg.cycleSec;
+  j += ",\"cycle_dash\":";     j += cfg.cycleDash ? "true" : "false";
+  j += ",\"button_hw\":";      j += USE_BUTTON ? "true" : "false";
   j += ",\"tracked\":\"";      j += hexList(cfg.tracked, cfg.trackedCount);
   j += "\",\"favs\":\"";       j += hexList(cfg.favs, cfg.favCount);
   j += "\",\"rules\":\"";      j += rulesToString();
@@ -172,6 +175,8 @@ void handlePostConfig() {
   if (server.hasArg("log_demo")) cfg.logDemo = server.arg("log_demo") == "1";
   if (server.hasArg("touch_on")) cfg.touchOn = server.arg("touch_on") == "1";
   if (server.hasArg("button_on")) cfg.buttonOn = server.arg("button_on") == "1";
+  if (server.hasArg("cycle")) { long v = server.arg("cycle").toInt(); cfg.cycleSec = (uint16_t)(v < 0 ? 0 : (v > 3600 ? 3600 : v)); }
+  if (server.hasArg("cycle_dash")) cfg.cycleDash = server.arg("cycle_dash") == "1";
   if (server.hasArg("repaint")) {
     long v = server.arg("repaint").toInt();
     cfg.repaintSec = (uint16_t)(v < 0 ? 0 : (v > 3600 ? 3600 : v));
@@ -274,7 +279,7 @@ void handleTouchInfo() {
   j += ",\"calibrated\":"; j += tcal.valid ? "true" : "false";
   j += ",\"enabled\":"; j += cfg.touchOn ? "true" : "false";
   j += ",\"stuck\":"; j += touchStuck ? "true" : "false";
-  j += ",\"button\":\""; j += digitalRead(BUTTON_PIN) ? "released" : "PRESSED/LOW";
+  j += ",\"button\":\""; j += !USE_BUTTON ? "disabled" : (digitalRead(BUTTON_PIN) ? "released" : "PRESSED/LOW");
   j += "\",\"button_stuck\":"; j += buttonStuck ? "true" : "false";
   j += "}";
   sendJson(j);
@@ -411,6 +416,15 @@ void handleTest() {
   else sendError(code < 0 ? "No answer from the server (" + String(code) + ")" : "Server answered HTTP " + String(code));
 }
 
+// ---------- /api/page?p=0..3  (change the device screen from the panel) ----------
+void handlePage() {
+  int p = server.arg("p").toInt();
+  if (p < 0 || p >= PAGE_COUNT) { sendError("bad page"); return; }
+  if (uiMode != UI_NORMAL) leaveUi();
+  showPage(p);
+  sendJson("{\"ok\":true}");
+}
+
 void handleAck() {
   ackAlerts();
   sendJson("{\"ok\":true}");
@@ -429,6 +443,7 @@ void webBegin() {
   server.on("/api/config", HTTP_POST, handlePostConfig);
   server.on("/api/query", HTTP_GET, handleQuery);
   server.on("/api/ack", HTTP_POST, handleAck);
+  server.on("/api/page", HTTP_POST, handlePage);
   server.on("/api/buzzer", HTTP_POST, handleBuzzer);
   server.on("/api/test", HTTP_POST, handleTest);
   server.on("/api/clearlog", HTTP_POST, handleClearLog);

@@ -45,6 +45,9 @@
 //  - held / shorted for more than 3 s = stuck -> ignored until released for 1 s
 //  - one action per press:  setup screen open -> cancel,  alarm -> silence,  otherwise -> next page
 void handleButton() {
+#if !USE_BUTTON
+  return;                                  // button disabled in this build
+#endif
   static uint32_t highSince = 0, lowSince = 0;
   static bool armed = false, fired = false;
   uint32_t now = millis();
@@ -82,7 +85,11 @@ void setup() {
 
   tft.init();
   tft.setRotation(SCREEN_ROTATION);   // landscape
+#if USE_BUTTON
   pinMode(BUTTON_PIN, INPUT_PULLUP);    // after tft.init()
+#else
+  pinMode(BUTTON_PIN, INPUT);           // button disabled: plain input, never read
+#endif
   splash("Starting...");
 
   if (!LittleFS.begin(true)) Serial.println("LittleFS mount failed");
@@ -91,7 +98,11 @@ void setup() {
   loadTouchCal();
 
   // (touch calibration is started only from the web panel - never automatically at power-on)
+#if USE_BUTTON
   Serial.printf("Button pin at boot: %s\n", digitalRead(BUTTON_PIN) ? "HIGH (released)" : "LOW (pressed or shorted to GND!)");
+#else
+  Serial.println("Push button disabled in this firmware (USE_BUTTON 0)");
+#endif
   Serial.printf("Touch raw Z at boot: %u (0 = not pressed or no reply; press the screen to see values)\n", tft.getTouchRawZ());
 
   splash("Starting CAN bus...");

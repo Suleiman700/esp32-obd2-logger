@@ -1,23 +1,23 @@
-OBD MONITOR v3.6.1 - READY-MADE FIRMWARE (no Arduino IDE needed)
+OBD MONITOR v3.6.2 - READY-MADE FIRMWARE (no Arduino IDE needed)
 ================================================================
 Built for: ESP32 Dev Module, 4MB flash, "Default 4MB with spiffs" partitions,
 display set to 10 MHz (User_Setup.h is already baked in).
 
 FILES
-  obd_monitor_v3.6.1_FULL_flash_at_0x0.bin   first install over USB  -> flash at address 0x0
-  obd_monitor_v3.6.1_ota.bin                 updates over WiFi (web panel) - or USB at 0x10000
+  obd_monitor_v3.6.2_FULL_flash_at_0x0.bin   first install over USB  -> flash at address 0x0
+  obd_monitor_v3.6.2_ota.bin                 updates over WiFi (web panel) - or USB at 0x10000
 
 FIRST INSTALL (once, over USB) - any computer with Chrome or Edge (Windows/Mac/Linux)
   1. Open https://espressif.github.io/esptool-js/
   2. Baudrate 460800 (or 115200 if it fails) -> Connect -> pick the ESP32 serial port
      (if it does not connect: hold the BOOT button on the ESP32 while clicking Connect)
-  3. Flash Address 0x0, choose obd_monitor_v3.6.1_FULL_flash_at_0x0.bin -> Program
+  3. Flash Address 0x0, choose obd_monitor_v3.6.2_FULL_flash_at_0x0.bin -> Program
   4. When done, press the EN/RST button (or power-cycle).
   Your settings (WiFi, PIDs, rules) are kept; only touch calibration may need redoing.
 
 FIRST INSTALL FROM AN ANDROID PHONE (USB OTG)
   - App: "ESPFlash - ESP32/ESP8266 Flasher" (Google Play). Flash the FULL file at 0x0,
-    or if the app only flashes the app part, use obd_monitor_v3.6.1_ota.bin at 0x10000.
+    or if the app only flashes the app part, use obd_monitor_v3.6.2_ota.bin at 0x10000.
   - Use a USB-A OTG adapter + normal USB cable if a USB-C to USB-C cable is not detected
     (many cheap ESP32 USB-C boards do not work with C-to-C cables).
 
